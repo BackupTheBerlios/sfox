@@ -4,8 +4,6 @@
 #ifdef _WIN32
 # include <windows.h>
 # include <GL/gl.h>
-# include <GL/glu.h>
-# include <GL/glaux.h>
 # include "starglext.h"
 #endif
 
@@ -15,12 +13,12 @@ extern PFNGLACTIVETEXTUREARBPROC	glActiveTexture;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC	glClientActiveTexture;
 
 /*VBO*/
-extern PFNGLBINDBUFFERARBPROC glBindBufferARB;
-extern PFNGLGENBUFFERSARBPROC glGenBuffersARB;
+extern PFNGLBINDBUFFERARBPROC    glBindBufferARB;
+extern PFNGLGENBUFFERSARBPROC    glGenBuffersARB;
 extern PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB;
-extern PFNGLBUFFERDATAARBPROC glBufferDataARB;
-extern PFNGLMAPBUFFERARBPROC glMapBufferARB;
-extern PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB;
+extern PFNGLBUFFERDATAARBPROC    glBufferDataARB;
+extern PFNGLMAPBUFFERARBPROC     glMapBufferARB;
+extern PFNGLUNMAPBUFFERARBPROC   glUnmapBufferARB;
 
 /*DXTC textures*/
 extern PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D;

@@ -1,9 +1,7 @@
 #ifdef _WIN32
 # include <windows.h>
-# include "stargl.h"
-# include "starglu.h"
+# include <GL/gl.h>
 # include "starglext.h"
-# include "starglaux.h"
 #endif /*_WIN32*/
 
 #include <stdio.h>
@@ -12,7 +10,6 @@
 
 #include "starengine.h"
 #include "stargl.h"
-#include "starglu.h"
 
 #include "vertexbuffer.h"
 #include "utility.h"

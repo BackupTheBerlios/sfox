@@ -1,8 +1,7 @@
 #ifdef _WIN32
 # include <windows.h>
-# include "stargl.h"
+# include <GL/gl.h>
 # include "starglext.h"
-# include "starglaux.h"
 #endif /* _WIN32 */
 
 #include <ft2build.h>

@@ -1,10 +1,9 @@
 #ifdef _WIN32
 # include <windows.h>
-#include <GL/glaux.h>
+#include <GL/gl.h>
 #endif
 
 #include "stargl.h"
-#include "starglu.h"
 #include "starglext.h"
 
 #include "starengine.h"
@@ -12,13 +11,13 @@
 #ifdef _WIN32
 PFNGLACTIVETEXTUREARBPROC	glActiveTexture;
 PFNGLCLIENTACTIVETEXTUREARBPROC	glClientActiveTexture;
-PFNGLBINDBUFFERARBPROC glBindBufferARB;
-PFNGLGENBUFFERSARBPROC glGenBuffersARB;
-PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB;
-PFNGLBUFFERDATAARBPROC glBufferDataARB;
-PFNGLMAPBUFFERARBPROC glMapBufferARB;
-PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB;
-PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D;
+PFNGLBINDBUFFERARBPROC          glBindBufferARB;
+PFNGLGENBUFFERSARBPROC          glGenBuffersARB;
+PFNGLDELETEBUFFERSARBPROC       glDeleteBuffersARB;
+PFNGLBUFFERDATAARBPROC          glBufferDataARB;
+PFNGLMAPBUFFERARBPROC           glMapBufferARB;
+PFNGLUNMAPBUFFERARBPROC         glUnmapBufferARB;
+PFNGLCOMPRESSEDTEXIMAGE2DPROC   glCompressedTexImage2D;
 #endif
 
 int
