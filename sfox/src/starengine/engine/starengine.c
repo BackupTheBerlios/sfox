@@ -12,7 +12,7 @@
 /* Multitexturing */
 PFNGLACTIVETEXTUREARBPROC	glActiveTexture;
 PFNGLCLIENTACTIVETEXTUREARBPROC	glClientActiveTexture;
-PFNGLMULTITEXCOORD2FPROC        glMultiTexCoord2f;
+PFNGLMULTITEXCOORD2FARBPROC        glMultiTexCoord2f;
 
 /* VBO */
 PFNGLBINDBUFFERARBPROC          glBindBufferARB;
@@ -39,7 +39,7 @@ starengine_init()
   glMapBufferARB = (PFNGLMAPBUFFERARBPROC) wglGetProcAddress("glMapBufferARB");
   glUnmapBufferARB = (PFNGLUNMAPBUFFERARBPROC) wglGetProcAddress("glUnmapBufferARB");
   glCompressedTexImage2D = (PFNGLCOMPRESSEDTEXIMAGE2DPROC) wglGetProcAddress("glCompressedTexImage2D");
-  glMultiTexCoord2f = (PFNGLMULTITEXCOORD2FPROC) wglGetProcAddress("glMultiTexCoord2f");
+  glMultiTexCoord2f = (PFNGLMULTITEXCOORD2FARBPROC) wglGetProcAddress("glMultiTexCoord2fARB");
 #endif
   return 0;
 }
