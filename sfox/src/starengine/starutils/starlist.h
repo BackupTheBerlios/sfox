@@ -6,7 +6,9 @@ typedef struct SSList {
   struct SSList *next;
 } SSList;
 
+/*Add data to the end of the list*/
 SSList *s_slist_append(SSList *slist, void *data);
+/*Free the list(not data)*/
 void s_slist_free(SSList *slist);
 
 /*From GLib*/
