@@ -86,6 +86,12 @@ plane_test_polygon(plane *pl, vector3 *point, unsigned int num)
   return PLCOPLANAR;
 }
 
+float
+plane_dist_to_point(plane *pl, vector3 *point)
+{
+  return pl->normal.x*point->x+pl->normal.y*point->y+pl->normal.z*point->z+pl->d;
+}
+
 void
 plane_print(plane *pl)
 {

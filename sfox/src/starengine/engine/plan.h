@@ -20,6 +20,8 @@ extern int plane_test_vector3(plane *pl, vector3 *v);
 
 extern int plane_test_polygon(plane *pl, vector3 *point, unsigned int num);
 
+extern float plane_dist_to_point(plane *pl, vector3 *point);
+
 extern void plane_print(plane *pl);
 
 #endif
