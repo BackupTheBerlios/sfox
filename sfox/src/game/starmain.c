@@ -50,7 +50,7 @@ draw_frame(unsigned int delta_time)
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
   scene_to_opengl(scn);
-
+  
   if(framework_get_fps() > 1)
     speed_factor = SPEEDCONST/framework_get_fps();
 
@@ -68,23 +68,23 @@ print_info()
   fontgl_printf(font, 0, 80, 0, "Speed factor: %.2f", speed_factor);
 
   /* Frutum tests */
-  /*{
-    frustum2d ftm2d;
-    bbox2d bb;
+/*   { */
+/*     frustum2d ftm2d; */
+/*     bbox2d bb; */
 
-    bbox2d_set(&bb, -500, 500, 500, -500);
-    frustum_to_frustum2d(&ftm2d, &camfps->ftm);
+/*     bbox2d_set(&bb, -500, 500, 500, -500); */
+/*     frustum_to_frustum2d(&ftm2d, &camfps->ftm); */
 
-    if(frustum2d_bbox_is_into(&ftm2d, &bb))
-      fontgl_printf(font, 0, 100, 0, "You are in the map.");
-    else
-      fontgl_printf(font, 0, 100, 0, "You are'nt in the map.");
+/*     if(frustum2d_bbox_is_into(&ftm2d, &bb)) */
+/*       fontgl_printf(font, 0, 100, 0, "You are in the map."); */
+/*     else */
+/*       fontgl_printf(font, 0, 100, 0, "You are'nt in the map."); */
 
-    if(frustum_point_is_into(&camfps->ftm, 0, 0, 0))
-      fontgl_printf(font, 0, 60, 0, "You see (0,0)");
-    else
-      fontgl_printf(font, 0, 60, 0, "You don't see (0,0)");
-      }*/
+/*     if(frustum_point_is_into(&camfps->ftm, 0, 0, 0)) */
+/*       fontgl_printf(font, 0, 60, 0, "You see (0,0)"); */
+/*     else */
+/*       fontgl_printf(font, 0, 60, 0, "You don't see (0,0)"); */
+/*   } */
 
 }
 
