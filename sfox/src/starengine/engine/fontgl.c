@@ -82,8 +82,8 @@ fontgl_init_texturesGL(fontgl font, unsigned int char_size)
 	glBindTexture(GL_TEXTURE_2D, font->tex_name[i]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, MAXTEXTURESIZE, MAXTEXTURESIZE,
 		     0, GL_ALPHA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     }
 }
 
