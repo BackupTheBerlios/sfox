@@ -91,9 +91,10 @@ heightfieldinfo_to_opengl(heightfieldinfo hfi)
   glVertex2f(pos.x-0.01, -pos.y+0.01);
   glEnd();
 
-  fprintf(stderr, "hfi %f\n", -vector3_dot(&cam->pos, &cam->ftm.left.normal));
+  /*  fprintf(stderr, "hfi %f\n", -vector3_dot(&cam->pos, &cam->ftm.left.normal));
   vector3_print(&cam->pos);
-  vector3_print(&cam->ftm.left.normal);
+  vector3_print(&cam->ftm.left.normal);*/
+  //  camera_update_frustum(cam);
 
   glPopAttrib();
 }

@@ -44,12 +44,15 @@ frustum_get_from_opengl(frustum *ftm)
   plane_normalize(&ftm->far);
   plane_normalize(&ftm->top);
   plane_normalize(&ftm->bottom);
-  //  plane_normalize(&ftm->left);
+  plane_normalize(&ftm->left);
   plane_normalize(&ftm->right);
 
-  fprintf(stderr, "%f\n", ftm->left.d);
-  fprintf(stderr, "frustum ");
+  //  fprintf(stderr, "%f\n", ftm->left.d);
+  fprintf(stderr, "LEFT from get_frustum %f ", ftm->left.d);
   vector3_print(&ftm->left.normal);
+  fprintf(stderr, "FAR from get_frustum ");
+  vector3_print(&ftm->far.normal);
+  fprintf(stderr, "\n");
 }
 
 void

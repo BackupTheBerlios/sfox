@@ -1,3 +1,8 @@
+2004-01-04  ben  <le.coyote@tiscali.fr>
+
+	* src/starengine/engine/camera.c (camera_update_frustum): Left
+	plane's normal seems to be OK...
+
 2003-12-29  ben  <le.coyote@tiscali.fr>
 
 	* src/starengine/engine/bbox.c: Added a 2d bbox, 2d frustum and 2d

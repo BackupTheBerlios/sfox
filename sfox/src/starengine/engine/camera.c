@@ -98,6 +98,7 @@ camera_to_opengl(camera cam)
     update_view(lcam);
     glLoadMatrixd((double *)lcam->view_matrix);
     frustum_get_from_opengl(&cam->ftm);
+    camera_update_frustum((camera)cam);
   }
 }
 
@@ -122,14 +123,34 @@ camera_set_pos(camera cam, double x, double y, double z)
 void
 camera_update_frustum(camera cam)
 {
+  vector3 L, D, F;
   struct local_camera *lcam = SF_LOCAL_CAMERA(cam);
 
   double tan_fov2 = tan(DEG2RAD(lcam->fov/2));
-  double left = -lcam->znear*tan_fov2; /* maybe it's bottom */
-  double bottom = -lcam->znear*tan_fov2*viewport_ratio(lcam->vp);
-  
-  
-  
+  double t = lcam->znear*tan_fov2; /*right or top?*/
+  double b = -t;
+  double r = t*viewport_ratio(lcam->vp);
+  double l = -r;
+  double near = lcam->znear;
+  double far = lcam->zfar;
+
+  vector3_set(&lcam->ftm.far.normal, lcam->view_matrix[0][2], lcam->view_matrix[1][2],
+	      lcam->view_matrix[2][2]);
+  vector3_set(&D, lcam->view_matrix[0][2], lcam->view_matrix[1][2],
+	      lcam->view_matrix[2][2]);
+  vector3_set(&L, lcam->view_matrix[0][0], lcam->view_matrix[1][0],
+	      lcam->view_matrix[2][0]);
+  vector3_scale(&D, &D, r);
+  vector3_scale(&L, &L, near);
+  vector3_sub(&lcam->ftm.left.normal, &L, &D);
+  //vector3_scale(&lcam->ftm.left.normal, &lcam->ftm.left.normal, sqrt(near*near+r*r));
+  vector3_normalise(&lcam->ftm.left.normal, &lcam->ftm.left.normal);
+
+  printf("LEFT from camera: %f ", t);
+  vector3_print(&lcam->ftm.left.normal);
+  printf("FAR from camera: ");
+  vector3_print(&lcam->ftm.far.normal);
+  printf("\n");
 }
 
 /***********************************************************************/

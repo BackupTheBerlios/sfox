@@ -31,4 +31,6 @@ extern void camera_side_move(camera cam, double speed);
 /* We stop moving the view up or down at angle angle (in DEG) */
 extern void camera_set_max_theta(camera cam, double angle);
 
+extern void camera_update_frustum(camera cam);
+
 #endif
