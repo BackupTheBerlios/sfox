@@ -397,11 +397,13 @@ create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int p
     double stepy = (double)step/h;
     double u, v = -py*stepv;
     double oldx = x;
+    y = INTERNAL_CENTER-py*stepy;
+    //printf("oldx= %f newx=%f\n", x = -INTERNAL_CENTER+px*stepx, x);
 
     //printf("x y=%f %f\n", -INTERNAL_CENTER+px*stepx, y);
     for(j = 0; j < hf->patch_sizex-1; j+=step) {
       unsigned int old_k = k+1;	/* Second vertex of the row */
-      for(i = 0, u = px*stepu, x = oldx; i < hf->patch_sizex; i+=step, ofs+=step) {
+      for(i = 0, u = px*stepu, x = -INTERNAL_CENTER+px*stepx; i < hf->patch_sizex; i+=step, ofs+=step) {
 	vertex_set_coord(&vertices[k], x, y, z[ofs]);
 	vertex_set_coord(&vertices[k+1], x, y-stepy, z[ofs+next_line]);
 	vertex_set_tcoord(&vertices[k], 0, u, v);
@@ -421,6 +423,7 @@ create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int p
     }
   }
   vertexbuffer_unlock(vb);
+  printf("lastx= %f\n", x);
 
   matrix4_to_scale(local, hf->sizex, hf->sizey, hf->sizez);
 
