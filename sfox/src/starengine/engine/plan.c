@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 
@@ -17,6 +18,13 @@ plane_setv(plane *pl, vector3 *normal, double d)
 {
   vector3_copy(&pl->normal, normal);
   pl->d = d;
+}
+
+void
+plane_copy(plane *dst, plane *src)
+{
+  vector3_copy(&dst->normal, &src->normal);
+  dst->d = src->d;
 }
 
 void
@@ -76,4 +84,11 @@ plane_test_polygon(plane *pl, vector3 *point, unsigned int num)
   else if(!all_front&&!all_back)
     return PLINTERSECT;
   return PLCOPLANAR;
+}
+
+void
+plane_print(plane *pl)
+{
+  printf("%f ", pl->d);
+  vector3_print(&pl->normal);
 }

@@ -3,7 +3,9 @@
 #undef near
 #undef far
 #endif /*_WIN32*/
+
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include <math.h>
 
@@ -137,7 +139,7 @@ camera_update_frustum(camera cam)
   double b = -t;
   double r = t*viewport_ratio(lcam->vp);
   double l = -r;
-  double near = lcam->znear;
+  double near = -lcam->znear;
   double far = lcam->zfar;
 
   /* First we extract L D U vectors from view matrix */
@@ -148,44 +150,47 @@ camera_update_frustum(camera cam)
   /*Far and Near planes*/
   {
     double d_dot_e = vector3_dot(&D, E);
-    plane_setv(&lcam->ftm.far, &D, d_dot_e+far );
-    plane_setv(&lcam->ftm.near, &D, d_dot_e+near );
+    plane_setv(&lcam->ftm.far, &D, d_dot_e-far );
+    vector3_scale(&tmp1, &D, -1);
+    plane_setv(&lcam->ftm.near, &tmp1, d_dot_e+near );
   }
   
   /* Left plane's normal = LN = normalise(near*L-right*D) */
   /* Left plane's distance = LN.E*/
-  vector3_scale(&tmp1, &L, near);
+  vector3_scale(&tmp1, &L, -near);
   vector3_scale(&tmp2, &D, l);
   vector3_add(&lcam->ftm.left.normal, &tmp1, &tmp2);
   /*vector3_scale(&lcam->ftm.left.normal, &lcam->ftm.left.normal, sqrt(near*near+r*r));*/
   vector3_normalise(&lcam->ftm.left.normal, &lcam->ftm.left.normal);
-  lcam->ftm.left.d = vector3_dot(&lcam->ftm.left.normal, E);
+  lcam->ftm.left.d = -vector3_dot(&lcam->ftm.left.normal, E);
 
-  /* Right plane's normal = RN = normalise(right*D-near*R) */
+  /* Right plane's normal = RN = normalise(-right*D+near*L) */
   /* Right plane's distance = RN.E*/
-  vector3_scale(&tmp1, &D, r);
+  vector3_scale(&tmp1, &D, -r);
   vector3_scale(&tmp2, &L, -near);
-  vector3_add(&lcam->ftm.right.normal, &tmp1, &tmp2);
+  vector3_sub(&lcam->ftm.right.normal, &tmp1, &tmp2);
   vector3_normalise(&lcam->ftm.right.normal, &lcam->ftm.right.normal);
-  lcam->ftm.right.d = vector3_dot(&lcam->ftm.right.normal, E);
+  lcam->ftm.right.d = -vector3_dot(&lcam->ftm.right.normal, E);
 
-  /* Top plane's normal = RN = normalise(left*D-near*L) */
+  /* Top plane's normal = RN = normalise(b*D-near*U) */
   /* Top plane's distance = RN.E*/
   vector3_scale(&tmp1, &D, b);
-  vector3_scale(&tmp2, &U, near);
+  vector3_scale(&tmp2, &U, -near);
   vector3_sub(&lcam->ftm.top.normal, &tmp1, &tmp2);
   vector3_normalise(&lcam->ftm.top.normal, &lcam->ftm.top.normal);
-  lcam->ftm.top.d = vector3_dot(&lcam->ftm.top.normal, E);
+  lcam->ftm.top.d = -vector3_dot(&lcam->ftm.top.normal, E);
 
-/*   printf("LEFT from camera: %f ", lcam->ftm.left.d); */
-/*   vector3_print(&lcam->ftm.left.normal); */
-/*   printf("RIGHT from camera: %f ", lcam->ftm.right.d); */
-/*   vector3_print(&lcam->ftm.right.normal); */
-/*   printf("TOP from camera: %f ", lcam->ftm.top.d); */
-/*   vector3_print(&lcam->ftm.top.normal); */
-/*   printf("FAR from camera: "); */
-/*   vector3_print(&lcam->ftm.far.normal); */
-/*   printf("\n"); */
+  /* Bottom plane's normal = RN = normalise(b*D+near*U) */
+  /* Top plane's distance = RN.E*/
+  vector3_scale(&tmp1, &D, b);
+  vector3_scale(&tmp2, &U, -near);
+  vector3_add(&lcam->ftm.bottom.normal, &tmp1, &tmp2);
+  vector3_normalise(&lcam->ftm.bottom.normal, &lcam->ftm.bottom.normal);
+  lcam->ftm.bottom.d = -vector3_dot(&lcam->ftm.bottom.normal, E);
+
+  printf("CAMERA:\n");
+  frustum_print(&lcam->ftm);
+  printf("\n");
 }
 
 /***********************************************************************/

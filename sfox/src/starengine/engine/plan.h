@@ -12,11 +12,14 @@ typedef struct {
 
 extern void plane_setv(plane *pl, vector3 *normal, double d);
 extern void plane_set(plane *pl, double nx, double ny, double nz, double d);
+extern void plane_copy(plane *dst, plane *src);
 extern void plane_normalize(plane *pl);
 
 extern int plane_test_point(plane *pl, double x, double y, double z);
 extern int plane_test_vector3(plane *pl, vector3 *v);
 
 extern int plane_test_polygon(plane *pl, vector3 *point, unsigned int num);
+
+extern void plane_print(plane *pl);
 
 #endif
