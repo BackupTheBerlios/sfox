@@ -16,6 +16,7 @@ typedef struct object3d {
   
 } object3d;
 
+#define SF_OBJECT3D(x) ((object3d *)(x))
 
 /* world is copied into object, vb,mat are pointers*/
 /* if vb is NULL, create an OpenGL list instead */
