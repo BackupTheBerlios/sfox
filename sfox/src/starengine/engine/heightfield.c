@@ -51,17 +51,11 @@ struct heightfield {
 /**********************************************************************/
 
 static float *create_zvalues(heightfield hf, char *filename);
-static object3d *create_mesh_stripped_lod(heightfield hf, double sizex, 
-					 double sizey, double sizez, int lod);
-//static object3d create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod);
-static object3d *create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int py, int lod);
 static object3d *create_mesh_patch_stripped_lod2(heightfield hf, float x, float y, int lod);
 static object3d *create_mesh_patch_stripped_lod_list(heightfield hf, float x, float y, int px, int py, int lod);
 
 static void quadtree_fill(quadtree_node node, void  *hf);
 static void quadtree_set_material(quadtree_node node, void *mat);
-static void quadtree_to_opengl(quadtree_node node, void *data);
-static void quadtree_set_world_matrix(quadtree_node node, void* world);
 static void quadtree_set_material(quadtree_node node, void* mat);
 static void quadtree_render(quadtree_node node, heightfield hf);
 
@@ -217,182 +211,7 @@ create_zvalues(heightfield hf, char *filename)
   return zvalues;
 }
 
-/*This function creates a heightfield of size(1,1,1) and fill the local*/
-/*matrix with a scale matrix*/
-/*lod starts at 0*/
-static object3d *
-create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double sizez, int lod)
-{
-  matrix4 local;
-  vertexbuffer vb;
-  unsigned int w, h, step;
-  unsigned int num_vert;
-
-  w = hf->w;
-  h = hf->h;
-  step = (1<<lod);
-
-  num_vert = (unsigned int)((2*ceil((double)w/step)+2)*(ceil((double)h/step)-1));
-  vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_STRIP, num_vert, 0);
-
-  vertexbuffer_lock(vb);
-  {
-    vertex *vertices = vertexbuffer_get_vertices(vb);
-    float *z = hf->zvalues;
-    unsigned int i, j, k = 0, ofs = 0;
-    unsigned int next_line = step*w;
-    double u=0, v=0, x, y = hf->sizey/2;
-    double stepu = (double)step*hf->sizex/w;
-    double stepv = -(double)step*hf->sizey/h;
-    double stepx = (double)step*hf->sizex/w;
-    double stepy = (double)step*hf->sizey/h;
-
-    for(j = 0; j < h-1; j+=step) {
-      unsigned int old_k = k+1;	/* Second vertex of the row */
-      for(i = 0, u = 0, x = -hf->sizex/2; i < w; i+=step, ofs+=step) {
-	vertex_set_coord(&vertices[k], x, y, z[ofs]);
-	vertex_set_coord(&vertices[k+1], x, y-stepy, z[ofs+next_line]);
-	vertex_set_tcoord(&vertices[k], 0, u, v);
-	vertex_set_tcoord(&vertices[k], 1, u, v);
-	vertex_set_tcoord(&vertices[k+1], 0, u, v-stepv);
-	vertex_set_tcoord(&vertices[k+1], 1, u, v-stepv);
-	k+=2;
-	x += stepx;
-	u += stepu;
-      }
-      ofs += next_line-w-(step-1);
-      vertex_copy(&vertices[k], &vertices[k-1]);
-      vertex_copy(&vertices[k+1], &vertices[old_k]);
-      k+=2;
-      v -= stepv;
-      y -= stepy;
-    }
-  }
-  vertexbuffer_unlock(vb);
-
-  matrix4_to_scale(local, sizex, sizey, sizez);
-
-  return object3d_create(matrix4_identity, vb, NULL);
-}
-
-/* static object3d * */
-/* create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int py, int lod) */
-/* { */
-/*   vertexbuffer vb; */
-/*   unsigned int w, h, step; */
-/*   unsigned int num_vert; */
-
-/*   px *= hf->patch_sizex-1; */
-/*   py *= hf->patch_sizex-1; */
-
-/*   w = hf->w; */
-/*   h = hf->h; */
-/*   step = (1<<lod); */
-
-/*   /\* num_vert is 2*(ceil(patch_sizex/step)+1)*(ceil(patch_sizex/step)-1) *\/ */
-/*   num_vert = (hf->patch_sizex-1)/step; */
-/*   num_vert *= 2*(num_vert+2); */
-/*   vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_STRIP, num_vert, 0); */
-
-/*   vertexbuffer_lock(vb); */
-/*   { */
-/*     vertex *vertices = vertexbuffer_get_vertices(vb); */
-/*     float *z = hf->zvalues; */
-/*     unsigned int i, j, k = 0, ofs = px+py*w; */
-/*     unsigned int next_line = step*w; */
-/*     double stepu = (double)step/w; */
-/*     double stepv = -(double)step/h; */
-/*     double stepx = (double)step/w; */
-/*     double stepy = (double)step/h; */
-/*     double u, v = -py*stepv; */
-/*     y = INTERNAL_CENTER-py*stepy; */
-/*     //printf("oldx= %f newx=%f\n", x = -INTERNAL_CENTER+px*stepx, x); */
-
-/*     //printf("x y=%f %f\n", -INTERNAL_CENTER+px*stepx, y); */
-/*     for(j = 0; j < hf->patch_sizex-1; j+=step) { */
-/*       unsigned int old_k = k+1;	/\* Second vertex of the row *\/ */
-/*       for(i = 0, u = px*stepu, x = -INTERNAL_CENTER+px*stepx; i < hf->patch_sizex; i+=step, ofs+=step) { */
-/* 	vertex_set_coord(&vertices[k], z[ofs]*hf->sizez, x*hf->sizex, y*hf->sizey); */
-/* 	vertex_set_coord(&vertices[k+1], x*hf->sizex, z[ofs+next_line]*hf->sizez, (y-stepy)*hf->sizey); */
-/* 	vertex_set_tcoord(&vertices[k], 0, u, v); */
-/* 	vertex_set_tcoord(&vertices[k], 1, u, v); */
-/* 	vertex_set_tcoord(&vertices[k+1], 0, u, v-stepv); */
-/* 	vertex_set_tcoord(&vertices[k+1], 1, u, v-stepv); */
-/* 	k+=2; */
-/* 	x += stepx; */
-/* 	u += stepu; */
-/*       } */
-/*       ofs += next_line-hf->patch_sizex-(step-1); */
-/*       vertex_copy(&vertices[k], &vertices[k-1]); */
-/*       vertex_copy(&vertices[k+1], &vertices[old_k]); */
-/*       k+=2; */
-/*       v -= stepv; */
-/*       y -= stepy; */
-/*     } */
-/*   } */
-/*   vertexbuffer_unlock(vb); */
-/*   printf("lastx= %f\n", x); */
-
-/*   return object3d_create(matrix4_identity, vb, NULL); */
-/* } */
-
-/* /\*Use display lists for patches*\/ */
-/* static object3d * */
-/* create_mesh_patch_stripped_lod_list(heightfield hf, double x, double y, int px, int py, int lod) */
-/* { */
-/*   object3d *obj = object3d_create(matrix4_identity, NULL, NULL); */
-/*   unsigned int w, h, step; */
-
-/*   px *= hf->patch_sizex-1; */
-/*   py *= hf->patch_sizex-1; */
-
-/*   w = hf->w; */
-/*   h = hf->h; */
-/*   step = (1<<lod); */
-
-/*   { */
-/*     double *z = hf->zvalues; */
-/*     unsigned int i, j, ofs = px+py*w; */
-/*     unsigned int next_line = step*w; */
-/*     double stepu = (double)step/w; */
-/*     double stepv = -(double)step/h; */
-/*     double stepx = (double)step/w; */
-/*     double stepy = (double)step/h; */
-/*     double u, v = -py*stepv; */
-    
-/*     y = INTERNAL_CENTER-py*stepy; */
-
-/*     object3d_BeginList(obj); */
-/*     object3d_Begin(GL_TRIANGLE_STRIP); */
-/*     for(j = 0; j < hf->patch_sizex-1; j+=step) { */
-/*       for(i = 0, u = px*stepu, x = -INTERNAL_CENTER+px*stepx; i < hf->patch_sizex; i+=step, ofs+=step) { */
-/* 	object3d_MultiTexCoord2f(0, u, v); */
-/* 	object3d_MultiTexCoord2f(1, u, v); */
-/* 	object3d_Vertex3f(x*hf->sizex, z[ofs]*hf->sizez, y*hf->sizey); */
-/* 	object3d_MultiTexCoord2f(0, u, v-stepv); */
-/* 	object3d_MultiTexCoord2f(1, u, v-stepv); */
-/* 	object3d_Vertex3f(x*hf->sizex, z[ofs+next_line]*hf->sizez, (y-stepy)*hf->sizey); */
-/* 	x += stepx; */
-/* 	u += stepu; */
-/*       } */
-/*       object3d_MultiTexCoord2f(0, u-stepu, v); */
-/*       object3d_MultiTexCoord2f(1, u-stepu, v); */
-/*       object3d_Vertex3f((x-stepx)*hf->sizex, z[next_line+(ofs-step)]*hf->sizez, (y-stepy)*hf->sizey); */
-/*       object3d_MultiTexCoord2f(0, px*stepu, v-stepv); */
-/*       object3d_MultiTexCoord2f(1, px*stepu, v-stepv); */
-/*       object3d_Vertex3f((-INTERNAL_CENTER+px*stepx)*hf->sizex, z[(ofs-step*i)+next_line]*hf->sizez, (y-stepy)*hf->sizey); */
-/*       ofs += next_line-hf->patch_sizex-(step-1); */
-/*       v -= stepv; */
-/*       y -= stepy; */
-/*     } */
-/*     object3d_End(); */
-/*     object3d_EndList(); */
-/*   } */
-
-/*   return obj; */
-/* } */
 /*Use display lists for patches*/
-
 static object3d *
 create_mesh_patch_stripped_lod_list(heightfield hf, float x, float y, int px, int py, int lod)
 {
@@ -416,7 +235,7 @@ create_mesh_patch_stripped_lod_list(heightfield hf, float x, float y, int px, in
     float stepy = step*hf->sizey/h;
     float u, v = -py*stepv;
 
-    printf("x=%f y=%f newx=%f newy=%f\n", x, y, -hf->sizex/2+px*stepx, -hf->sizey/2+py*stepy);
+    //printf("x=%f y=%f newx=%f newy=%f\n", x, y, -hf->sizex/2+px*stepx, -hf->sizey/2+py*stepy);
     y = -hf->sizey/2+py*stepy;
 
     object3d_BeginList(obj);
@@ -476,16 +295,4 @@ static void
 quadtree_set_material(quadtree_node node, void *mat)
 {
   object3d_set_material((object3d *)node->data, (material)mat);
-}
-
-static void
-quadtree_set_world_matrix(quadtree_node node, void *world)
-{
-  object3d_set_world_matrix((object3d *)node->data, (double **)world);
-}
-
-static void
-quadtree_to_opengl(quadtree_node node, void *data)
-{
-  object3d_to_opengl((object3d *)node->data);
 }
