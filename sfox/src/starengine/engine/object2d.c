@@ -10,54 +10,54 @@
 #include "material.h"
 #include "vertexbuffer.h"
 
-struct object2d {
-  matrix4 local;
-  matrix4 world;
-  material mat;
+/* struct object2d { */
+/*   matrix4 world; */
+/*   material mat; */
 
-  vertexbuffer vb;
-  double width, height;
-};
+/*   vertexbuffer vb; */
+/*   float width, height; */
+/* }; */
 
 /**********************************************************************/
 /* Static declarations                                                */
 /**********************************************************************/
 
 /*Create a 1x1 quad*/
-static vertexbuffer create_quad();
+static vertexbuffer create_quad(float sizex, float sizey);
 
 /**********************************************************************/
 /* And now for something completely different                         */
 /**********************************************************************/
 
-object2d
-object2d_create(double sizex, double sizey, const matrix4 local, const matrix4 world, material mat)
+object2d *
+object2d_create(float sizex, float sizey, matrix4 world, material mat)
 {
-  matrix4 scale;
-  object2d obj = malloc(sizeof(struct object2d));
-  assert(sizey>0||sizex>0);
+  object2d *obj = malloc(sizeof(struct object2d));
+  object2d_init(obj, sizex, sizey, world, mat);
+  
+  return obj;
+}
 
-  obj->vb = create_quad();
+void
+object2d_init(object2d *obj, float sizex, float sizey, matrix4 world, material mat)
+{
+  assert(sizey>0&&sizex>0);
+
+  obj->vb = create_quad(sizex, sizey);
   obj->mat = mat;
   obj->width = sizex;
   obj->height = sizey;
 
   matrix4_copy(obj->world, world);
- /* Scale the 1x1 quad to sizex x sizey thanks to the local matrix */
-  matrix4_to_scale(scale, sizex, sizey, 1);
-  matrix4_mul(obj->local, local, scale);
-
-  return obj;
 }
 
 void
-object2d_to_opengl(object2d obj)
+object2d_to_opengl(object2d *obj)
 {
   assert(obj);
   glPushMatrix();
 
   glMultMatrixd((double *)obj->world);
-  glMultMatrixd((double *)obj->local);
   if(obj->mat)
     material_to_opengl(obj->mat);
   vertexbuffer_to_opengl(obj->vb);
@@ -66,10 +66,16 @@ object2d_to_opengl(object2d obj)
 }
 
 void
-object2d_destroy(object2d obj)
+object2d_destroy(object2d *obj)
 {
   vertexbuffer_destroy(obj->vb);
   obj->vb = NULL;
+}
+
+void
+object2d_free(object2d *obj)
+{
+  object2d_destroy(obj);
   free(obj);
 }
 
@@ -77,36 +83,35 @@ object2d_destroy(object2d obj)
 /*Setter and getter                                                     */
 /************************************************************************/
 void
-object2d_set_local_matrix(object2d obj, matrix4 local)
-{
-  matrix4_copy(obj->local, local);
-}
-
-void
-object2d_set_world_matrix(object2d obj, matrix4 world)
+object2d_set_world_matrix(object2d *obj, matrix4 world)
 {
   matrix4_copy(obj->world, world);
 }
 
 matrix4 *
-object2d_get_local_matrix(object2d obj)
-{
-  return &obj->local;
-}
-
-matrix4 *
-object2d_get_world_matrix(object2d obj)
+object2d_get_world_matrix(object2d *obj)
 {
   return &obj->world;
 }
 
+float
+object2d_width(object2d *obj)
+{
+  return obj->width;
+}
+
+float
+object2d_height(object2d *obj)
+{
+  return obj->height;
+}
 
 /***********************************************************************/
 /* Static functions                                                    */
 /***********************************************************************/
 
 static vertexbuffer
-create_quad()
+create_quad(float sizex, float sizey)
 {
   vertexbuffer vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_STRIP, 4, 0);
 
@@ -116,9 +121,9 @@ create_quad()
     vertex *vert = vertexbuffer_get_vertices(vb);
     
     vertex_set_coord(&vert[0], 0, 0, 0);
-    vertex_set_coord(&vert[1], 0, 1, 0);
-    vertex_set_coord(&vert[2], 1, 0, 0);
-    vertex_set_coord(&vert[3], 1, 1, 0);
+    vertex_set_coord(&vert[1], 0, sizey, 0);
+    vertex_set_coord(&vert[2], sizex, 0, 0);
+    vertex_set_coord(&vert[3], sizex, sizey, 0);
 
     for(i = 0; i < MAX_TEXTURES; i++) {
       vertex_set_tcoord(&vert[0], i, 0, 0);
