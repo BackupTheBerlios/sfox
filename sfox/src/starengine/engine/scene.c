@@ -100,7 +100,7 @@ slist_to_opengl(SSList *list)
     glPushMatrix();
     rel->to_opengl_func(rel->object);
     glPopMatrix();
-    list = s_slist_next(list);
+    list = list->next;
   }
 }
 

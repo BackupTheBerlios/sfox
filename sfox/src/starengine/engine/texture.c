@@ -140,7 +140,7 @@ texture_env_to_opengl(texture tex)
 
   while(elem) {
     pname = (unsigned int)elem->data;
-    elem = s_slist_next(elem);
+    elem = elem->next;
     assert(elem);
     param = (unsigned int)elem->data;
     glTexEnvi(GL_TEXTURE_ENV, pname, param);  
