@@ -1,3 +1,7 @@
+2004-01-11  ben  <le.coyote@tiscali.fr>
+
+	* general: Win32 compilation is ok
+
 2004-01-05  ben  <le.coyote@tiscali.fr>
 
 	* src/starengine/engine/camera.c (camera_update_frustum): Pratical

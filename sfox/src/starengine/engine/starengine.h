@@ -10,14 +10,19 @@
 #endif
 
 #ifdef _WIN32
+/*Multitexturing*/
 extern PFNGLACTIVETEXTUREARBPROC	glActiveTexture;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC	glClientActiveTexture;
+
+/*VBO*/
 extern PFNGLBINDBUFFERARBPROC glBindBufferARB;
 extern PFNGLGENBUFFERSARBPROC glGenBuffersARB;
 extern PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB;
 extern PFNGLBUFFERDATAARBPROC glBufferDataARB;
 extern PFNGLMAPBUFFERARBPROC glMapBufferARB;
 extern PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB;
+
+/*DXTC textures*/
 extern PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D;
 #endif
 
