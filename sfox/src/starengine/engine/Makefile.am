@@ -1,4 +1,4 @@
-CFLAGS=@SDL_CFLAGS@ @X_CFLAGS@ @FT2_CFLAGS@ @GLIB_CFLAGS@
+CFLAGS=@SDL_CFLAGS@ @X_CFLAGS@ @FT2_CFLAGS@ @GLIB_CFLAGS@ @CFLAGS@
 noinst_LIBRARIES=libengine.a
 INCLUDES=-I$(top_srcdir)/src/starengine/math -I$(top_srcdir)/src/starengine/engine/opengl -I$(top_srcdir)/src/starengine/framework
 libengine_a_SOURCES=viewport.c camera.c vertexbuffer.c vertex.c object3d.c \
