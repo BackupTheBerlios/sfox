@@ -41,6 +41,7 @@ scene_create()
 {
   scene scn = malloc(sizeof(struct scene));
   scn->render_list = NULL;
+  scn->render2d_list = NULL;
   scn->cam = NULL;
   scn->disp = NULL;
 
