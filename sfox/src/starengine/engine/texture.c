@@ -11,11 +11,13 @@
 #include "texture.h"
 #include "dds.h"
 #include "matrix.h"
+#include "utility.h"
 
 static const GLuint clamp_mode[] = { GL_CLAMP, GL_CLAMP_TO_EDGE, GL_REPEAT };
 static const GLuint filter_mode[] = { GL_NEAREST, GL_LINEAR, 
 				      GL_NEAREST_MIPMAP_NEAREST,
 				      GL_LINEAR_MIPMAP_NEAREST,
+				      GL_NEAREST_MIPMAP_LINEAR,
 				      GL_LINEAR_MIPMAP_LINEAR };
 static const GLuint data_kind[] = { GL_UNSIGNED_BYTE, GL_UNSIGNED_INT};
 static const GLuint pixel_format[] = { GL_RGB, GL_RGBA, GL_ALPHA };
@@ -63,6 +65,7 @@ texture_set_min_filter_mode(texture tex, filtermode mode)
 void
 texture_set_mag_filter_mode(texture tex, filtermode mode)
 {
+  assert(mode==LINEAR||mode==NEAREST);
   glBindTexture(GL_TEXTURE_2D, tex->tex_name);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter_mode[mode]);
 }
