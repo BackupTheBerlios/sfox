@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "starengine.h"
 #include "stargl.h"
 
 #include "object3d.h"
