@@ -28,10 +28,10 @@ heightfieldinfo
 heightfieldinfo_create(char *landmap, heightfield hf, camera cam, display disp, double sizex, double sizey)
 { 
   matrix4 world;
+  heightfieldinfo hfi = malloc(sizeof(struct heightfieldinfo));
+
   matrix4_to_translate(world, display_width(disp)-sizex,
 		       display_height(disp)-sizey, 0);
-
-  heightfieldinfo hfi = malloc(sizeof(struct heightfieldinfo));
   hfi->obj = object2d_create(sizex, sizey, matrix4_identity, world,
 			   material_create_single_texture_from_file(landmap));
   hfi->cam = cam;
