@@ -29,6 +29,11 @@
 ** version 1.2.1 Specification.
 */
 
+#ifdef _WIN32
+# include <GL/gl.h>
+# include <GL/glu.h>
+#else
+
 #ifndef __glu_h__
 #define __glu_h__
 
@@ -323,3 +328,4 @@ GLAPI GLint APIENTRY gluUnProject4 (GLdouble winX, GLdouble winY, GLdouble winZ,
 #endif
 
 #endif /* __glu_h__ */
+#endif /* _WIN32 */

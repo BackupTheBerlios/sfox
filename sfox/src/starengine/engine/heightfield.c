@@ -1,3 +1,10 @@
+#ifdef _WIN32
+# include <windows.h>
+# include "stargl.h"
+# include "starglext.h"
+# include "starglaux.h"
+#endif
+
 #include <stdlib.h>
 #include <assert.h>
 #include <SDL.h>

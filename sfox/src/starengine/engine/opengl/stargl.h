@@ -1,3 +1,7 @@
+#ifdef _WIN32
+# include <GL/gl.h>
+#else
+
 #ifndef __gl_h_
 #define __gl_h_
 
@@ -3312,3 +3316,4 @@ GLAPI void APIENTRY glWindowPos3svARB (const GLshort *p);
 #endif
 
 #endif /* __gl_h_ */
+#endif /* _WIN32 */

@@ -54,8 +54,8 @@ Abstract:
  */
 
 #include <windows.h>
-#include "stargl.h"
-#include "starglu.h"
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,6 +1,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include "starengine.h"
 #include "viewport.h"
 #include "color.h"
 #include "vertexbuffer.h"

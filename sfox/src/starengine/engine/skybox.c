@@ -20,7 +20,7 @@ struct skybox {
 skybox
 skybox_create(camera cam, char *left, char *right, char *front, char *back, char *top, char *bottom, double sx)
 {
-  matrix4 r, t, s;
+  matrix4 r, t;
   unsigned int i;
   material mat[6];
   texture tex[6];

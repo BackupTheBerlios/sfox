@@ -239,5 +239,6 @@ app_init(int argc, char **argv)
   framework_set_resize_handler(handle_resize);
   
   screen = display_create("Star", 800, 600, 24, 0);
+  starengine_init();
   init();
 }

@@ -1,18 +1,18 @@
 #ifdef _WIN32
 # include <windows.h>
-# include <ft2build.h>
-# include <freetype/freetype.h>
+# include "stargl.h"
+# include "starglext.h"
 # include "starglaux.h"
-#else
-# include <ft2build.h>
-# include FT_FREETYPE_H
 #endif /* _WIN32 */
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include <freetype/ftglyph.h>
 #include <assert.h>
 #include <math.h>
 #include <stdarg.h>
 
+#include "starengine.h"
 #include "stargl.h"
 #include "starglu.h"
 
@@ -209,7 +209,7 @@ fontgl_begin(fontgl font)
     glPushMatrix();
     glLoadIdentity();
 
-    glActiveTextureARB(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
 
