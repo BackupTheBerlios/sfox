@@ -1,0 +1,73 @@
+AC_INIT(src/game/starmain.c)
+
+dnl Detect the canonical host and target build environment
+AC_CANONICAL_HOST
+AC_CANONICAL_TARGET
+
+AM_INIT_AUTOMAKE(starmain, 0.0.1)
+
+AC_PROG_RANLIB
+AC_PROG_CC
+
+REQUIRED_SDL_VERSION=1.2.0
+REQUIRED_GLIB2_VERSION=2.0.0
+REQUIRED_FREETYPE2_VERSION=2.0.0
+
+AC_C_CONST
+AC_CHECK_HEADERS([string.h])
+AC_CHECK_FUNCS([memset])
+
+dnl Checks for SDL.
+AM_PATH_SDL([$REQUIRED_SDL_VERSION],, AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!]))
+
+dnl Checks for glib
+AM_PATH_GLIB_2_0([$REQUIRED_GLIB2_VERSION],, AC_MSG_ERROR([*** GLIB-2 version too old]))
+
+dnl Checks for freetype2
+AC_CHECK_FT2([$REQUIRED_FREETYPE2_VERSION],, AC_MSG_ERROR([*** FREETYPE2 version too old]))
+
+dnl Check for SDL_image
+AC_CHECK_LIB(SDL_image, IMG_Load,SDL_LIBS="$SDL_LIBS -lSDL_image",  AC_MSG_ERROR(*** SDL_image not found))
+
+dnl Check for libpng
+AC_CHECK_LIB(png, png_init_io,,  AC_MSG_ERROR(*** libpng not found))
+
+dnl Figure out which math and gl library to use
+case "$target" in
+    *-*-cygwin* | *-*-mingw32*)
+        MATHLIB=""
+        SYS_GL_LIB="opengl32"
+        SYS_GLU_LIB="openglu32"
+        ;;
+    *)
+        dnl Checks for x11
+        AC_PATH_X
+        AC_PATH_XTRA
+
+	OPENGL_LIBS="$X_LIBS -lpthread"
+        MATHLIB="m"
+        SYS_GL_LIB="GL"
+        SYS_GLU_LIB="GLU"
+        ;;
+esac
+AC_SUBST(MATHLIB)
+
+dnl Check for opengl libraries
+AC_CHECK_LIB($SYS_GL_LIB, glBegin,[ OPENGL_LIBS="-l$SYS_GL_LIB $OPENGL_LIBS" ], AC_MSG_ERROR(OpenGL is not installed: missing $SYS_GL_LIB library))
+AC_CHECK_LIB($SYS_GLU_LIB, gluPerspective,[ OPENGL_LIBS="$OPENGL_LIBS -l$SYS_GLU_LIB" ], [ AC_MSG_ERROR(OpenGL is not installed: missing $SYS_GLU_LIB library)], [$OPENGL_LIBS])
+
+AC_SUBST(OPENGL_LIBS)
+AC_SUBST(OPENGL_FLAGS)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+
+AC_OUTPUT([Makefile \
+        src/Makefile \
+	src/game/Makefile \
+	src/starengine/Makefile \
+	src/starengine/framework/Makefile \
+	src/starengine/engine/Makefile \
+	src/starengine/math/Makefile \
+	src/utils/Makefile \
+	src/utils/raw2png/Makefile])

@@ -1,0 +1,40 @@
+2003-12-29  ben  <le.coyote@tiscali.fr>
+
+	* src/starengine/engine/bbox.c: Added a 2d bbox, 2d frustum and 2d
+	line.
+
+2003-12-26  ben  <le.coyote@tiscali.fr>
+
+	* src/starengine/engine/heightfieldinfo.c
+	(heightfieldinfo_to_opengl): Tried to make it feels less like a
+	hack.(still a mirroring problem)
+
+	* src/starengine/math/matrix.c: Added an inverse function
+
+2003-12-24  ben  <le.coyote@tiscali.fr>
+
+	* src/starengine/engine/object2d.c: Added 2d objects managed into
+	scene.c.
+
+	* src/starengine/engine/heightfieldinfo.c
+	(heightfieldinfo_to_opengl): Started a minimap.
+
+2003-12-22  ben  <le.coyote@tiscali.fr>
+
+	* src/game/starmain.c (handle_mouse): It's a handle so the mouse
+	movement is independent of the FPS
+	(init): The far/near distance caused div 0 in frustum when near was
+	too small.
+
+2003-12-21  ben  <le.coyote@tiscali.fr>
+
+	* src/starengine/engine/heightfield.c (create_mesh_stripped_lod):
+	This function create a mesh of the heightfield with the specified lod.
+
+2003-12-20  ben  <le.coyote@tiscali.fr>
+
+	* src/starengine/engine/heightfield.c (create_mesh_stripped):
+	Added a stripped mesh version of the heightfield
+	(create_mesh_stripped): Now the heightfield usse an array of double
+	for z values.
+

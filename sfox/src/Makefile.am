@@ -1,0 +1,1 @@
+SUBDIRS=starengine utils game
