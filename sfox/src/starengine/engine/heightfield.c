@@ -51,7 +51,7 @@ heightfield_create_from_file(char *heightmap_filename, double sizex,
     return NULL;
   }
 
-  hf->obj = create_mesh_stripped_lod(hf, sizex, sizey, sizez, 0);
+  hf->obj = create_mesh_stripped_lod(hf, sizex, sizey, sizez, 1);
   if(!hf->obj) {
     free(hf->zvalues);
     free(hf);
