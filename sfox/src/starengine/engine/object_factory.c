@@ -30,7 +30,7 @@ create_plan_xy(double sizex, double sizey, int subdiv_x, int subdiv_y)
 
   assert(subdiv_x>0&&subdiv_y>0);
 
-  vb = vertexbuffer_create(TRIANGLES_INDEXED, (subdiv_x+1)*(subdiv_y+1), subdiv_x*subdiv_y*6);
+  vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_INDEXED, (subdiv_x+1)*(subdiv_y+1), subdiv_x*subdiv_y*6);
 
   vertexbuffer_lock(vb);
   {
@@ -86,7 +86,7 @@ create_cube(double size)
   int *indices;
   vertexbuffer vb;
 
-  vb = vertexbuffer_create(TRIANGLES_INDEXED, 8, 36);
+  vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_INDEXED, 8, 36);
 
   vertexbuffer_lock(vb);
   vertices = vertexbuffer_get_vertices(vb);

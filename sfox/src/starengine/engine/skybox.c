@@ -38,7 +38,7 @@ skybox_create(camera cam, char *left, char *right, char *front, char *back, char
     texture_add_texture_env(tex[i], GL_TEXTURE_ENV_MODE, GL_REPLACE);
     texture_set_st_clamp_mode(tex[i], CLAMP_TO_EDGE);
     texture_set_min_filter_mode(tex[i], LINEAR);
-    texture_set_mag_filter_mode(tex[i], LINEAR_MIPMAP_LINEAR);
+    texture_set_mag_filter_mode(tex[i], LINEAR);
     mat[i] = material_create(&tex[i], 1, NULL, 0, 0);
     sb->obj[i] = create_plan_xy(sx, sx, 1, 1);
     object3d_set_material(sb->obj[i], mat[i]);

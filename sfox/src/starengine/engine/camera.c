@@ -172,15 +172,15 @@ camera_update_frustum(camera cam)
   vector3_normalise(&lcam->ftm.top.normal, &lcam->ftm.top.normal);
   lcam->ftm.top.d = vector3_dot(&lcam->ftm.top.normal, E);
 
-  printf("LEFT from camera: %f ", lcam->ftm.left.d);
-  vector3_print(&lcam->ftm.left.normal);
-  printf("RIGHT from camera: %f ", lcam->ftm.right.d);
-  vector3_print(&lcam->ftm.right.normal);
-  printf("TOP from camera: %f ", lcam->ftm.top.d);
-  vector3_print(&lcam->ftm.top.normal);
+/*   printf("LEFT from camera: %f ", lcam->ftm.left.d); */
+/*   vector3_print(&lcam->ftm.left.normal); */
+/*   printf("RIGHT from camera: %f ", lcam->ftm.right.d); */
+/*   vector3_print(&lcam->ftm.right.normal); */
+/*   printf("TOP from camera: %f ", lcam->ftm.top.d); */
+/*   vector3_print(&lcam->ftm.top.normal); */
 /*   printf("FAR from camera: "); */
 /*   vector3_print(&lcam->ftm.far.normal); */
-  printf("\n");
+/*   printf("\n"); */
 }
 
 /***********************************************************************/

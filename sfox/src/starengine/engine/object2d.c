@@ -35,7 +35,6 @@ object2d_create(double sizex, double sizey, const matrix4 local, const matrix4 w
   assert(sizey>0||sizex>0);
 
   obj->vb = create_quad();
-
   obj->mat = mat;
   obj->width = sizex;
   obj->height = sizey;
@@ -106,7 +105,7 @@ object2d_get_world_matrix(object2d obj)
 static vertexbuffer
 create_quad()
 {
-  vertexbuffer vb = vertexbuffer_create(TRIANGLES_STRIP, 4, 0);
+  vertexbuffer vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_STRIP, 4, 0);
 
   vertexbuffer_lock(vb);
   {
@@ -124,7 +123,7 @@ create_quad()
       vertex_set_tcoord(&vert[2], i, 1, 0);
       vertex_set_tcoord(&vert[3], i, 1, 1);
     }
-  }  
+  }
   vertexbuffer_unlock(vb);
   
   return vb;

@@ -8,7 +8,7 @@
 #include "engine.h"
 #include "framework.h"
 #include "display.h"
-
+#include "utility.h"
 #include "fontgl.h"
 
 #define SPEEDCONST 54
