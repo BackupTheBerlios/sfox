@@ -1,3 +1,6 @@
+#ifdef _WIN32
+#include <windows.h>
+#endif /*_WIN32*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +15,7 @@
 #define MAX(x,y) (((x)>(y))?(x):(y))
 #endif
 
-#ifndef MAKE_FOURCC
+#ifndef MAKEFOURCC
 #define MAKEFOURCC(ch0, ch1, ch2, ch3)\
                 ((unsigned int)(unsigned char)(ch0) | \
                 ((unsigned int)(unsigned char)(ch1) << 8) |  \
@@ -102,7 +105,9 @@ struct DDSURFACEDESC2 {
   unsigned int dwReserved2;
 };
 
+#ifndef _WIN32
 typedef unsigned int FOURCC;
+#endif
 
 static unsigned int calc_mipmap_size(unsigned int width, unsigned int height, int dxt_version);
 

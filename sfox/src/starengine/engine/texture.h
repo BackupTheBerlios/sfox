@@ -1,8 +1,6 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "stargl.h"
-
 #include "matrix.h"
 
 typedef enum {CLAMP=0, CLAMP_TO_EDGE, REPEAT} clampmode;

@@ -1,5 +1,5 @@
-#ifndef PLAN_H
-#define PLAN_H
+#ifndef PLAN9_H
+#define PLAN9_H
 
 #include "mathengine.h"
 

@@ -1,4 +1,8 @@
+#ifdef _WIN32
+#include <windows.h>
+#endif /*_WIN32*/
 #include <stdio.h>
+
 #include "stargl.h"
 
 #include "frustum.h"

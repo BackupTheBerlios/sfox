@@ -1,3 +1,8 @@
+#ifdef _WIN32
+#include <windows.h>
+#undef near
+#undef far
+#endif /*_WIN32*/
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
@@ -246,7 +251,7 @@ camera_move_along_view(camera cam, double speed)
 void
 camera_side_move(camera cam, double speed)
 {
-  vector3 tmp, view, axis;
+  vector3 view, axis;
 
   vector3_sub(&view, &cam->look_at, &cam->pos);
   vector3_normalise(&view, &view);

@@ -1,5 +1,13 @@
-#include <ft2build.h>
-#include FT_FREETYPE_H
+#ifdef _WIN32
+# include <windows.h>
+# include <ft2build.h>
+# include <freetype/freetype.h>
+# include "starglaux.h"
+#else
+# include <ft2build.h>
+# include FT_FREETYPE_H
+#endif /* _WIN32 */
+
 #include <freetype/ftglyph.h>
 #include <assert.h>
 #include <math.h>

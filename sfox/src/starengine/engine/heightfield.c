@@ -4,6 +4,8 @@
 #include <SDL_image.h>
 #include <math.h>
 
+#include "stargl.h"
+
 #include "heightfield.h"
 #include "object3d.h"
 #include "matrix.h"
@@ -25,8 +27,6 @@ struct heightfield {
 /**********************************************************************/
 
 static double *create_zvalues(heightfield hf, char *filename);
-static object3d create_mesh_stripped(heightfield hf, double sizex, 
-				     double sizey);
 static object3d create_mesh_stripped_lod(heightfield hf, double sizex, 
 					 double sizey, double sizez, int lod);
 
@@ -38,7 +38,6 @@ heightfield
 heightfield_create_from_file(char *heightmap_filename, double sizex,
 			     double sizey, double sizez)
 {
-  object3d obj;
   heightfield hf;
   assert(heightmap_filename);
 
@@ -176,7 +175,6 @@ static object3d
 create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double sizez, int lod)
 {
   matrix4 local;
-  object3d obj;
   vertexbuffer vb;
   unsigned int w, h, step;
   unsigned int num_vert;

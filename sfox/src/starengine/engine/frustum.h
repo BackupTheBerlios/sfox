@@ -1,6 +1,11 @@
 #ifndef FRUSTUM_H
 #define FRUSTUM_H
 
+#ifdef _WIN32
+#undef near
+#undef far
+#endif
+
 #include "bbox.h"
 #include "line.h"
 #include "plan.h"

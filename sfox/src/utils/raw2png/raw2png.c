@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <libgen.h>
+#ifndef _WIN32
+# include <libgen.h>
+#endif /*_WIN32*/
 #include <math.h>
 #include <png.h>
 
@@ -12,7 +14,11 @@ unsigned char *raw_buffer;
 void
 usage(char *arg0)
 {
+#ifndef _WIN32
   fprintf(stderr, "usage: %s file.raw file.png\n", basename(arg0));
+#else
+  fprintf(stderr, "usage: %s file.raw file.png\n", arg0);
+#endif /*_WIN32*/
   fprintf(stderr, "file.raw must be a square raw 8bits image\n");
   exit(EXIT_FAILURE);
 }

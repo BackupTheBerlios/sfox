@@ -1,5 +1,7 @@
 #include <stdlib.h>
 
+#include "stargl.h"
+
 #include "skybox.h"
 
 #include "camera.h"

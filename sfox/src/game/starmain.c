@@ -1,3 +1,9 @@
+#ifdef _WIN32
+#include <windows.h>
+#include "starglaux.h"
+#undef near
+#undef far
+#endif /*_WIN32*/
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>

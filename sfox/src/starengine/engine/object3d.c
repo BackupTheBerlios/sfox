@@ -1,5 +1,11 @@
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <stdlib.h>
 #include <assert.h>
+
+#include "stargl.h"
 
 #include "object3d.h"
 

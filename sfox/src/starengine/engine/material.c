@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#include <windows.h>
+#include "starglaux.h"
+#endif /*_WIN32*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
