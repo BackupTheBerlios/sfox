@@ -6,6 +6,10 @@
 #include "vector3.h"
 #include "mathmacro.h"
 
+vector3 ZAXIS = {0, 0, 1};
+vector3 YAXIS = {0, 1, 0};
+vector3 XAXIS = {1, 0, 0};
+
 void
 vector3_add(vector3 *v1, vector3 *v2, vector3 *v3)
 {

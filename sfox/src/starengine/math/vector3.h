@@ -20,6 +20,8 @@ typedef struct vector3 {
   double x,y,z;
 } vector3;
 
+extern vector3 ZAXIS, YAXIS, XAXIS;
+
 extern void vector2_set(vector2 *v, double x, double y);
 extern INLINE void
 vector2_copy(vector2 *dst, vector2 *src)
