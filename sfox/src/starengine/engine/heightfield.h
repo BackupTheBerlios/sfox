@@ -16,7 +16,6 @@ extern void heightfield_set_detail_scale(heightfield hf, double sx, double sy);
 extern void heightfield_to_opengl(heightfield hf);
 
 /*Common setters and getters*/
-extern object3d heightfield_get_object(heightfield hf);
 extern void heightfield_set_local_matrix(heightfield hf, matrix4 local);
 extern void heightfield_set_world_matrix(heightfield hf, matrix4 world);
 extern matrix4 *heightfield_get_world_matrix(heightfield hf);
