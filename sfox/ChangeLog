@@ -1,3 +1,8 @@
+2004-01-27  ben  <le.coyote@tiscali.fr>
+
+	* src/starengine/engine/quadtree.c (quadtree_create): Now create
+	4^level leaves.
+
 2004-01-13  ben  <le.coyote@tiscali.fr>
 
 	* src/starengine/engine/heightfield.c
