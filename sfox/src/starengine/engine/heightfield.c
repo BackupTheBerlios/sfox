@@ -55,11 +55,11 @@ struct heightfield {
 /**********************************************************************/
 
 static double *create_zvalues(heightfield hf, char *filename);
-static object3d create_mesh_stripped_lod(heightfield hf, double sizex, 
+static object3d *create_mesh_stripped_lod(heightfield hf, double sizex, 
 					 double sizey, double sizez, int lod);
 //static object3d create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod);
-static object3d create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int py, int lod);
-static object3d create_mesh_patch_stripped_lod2(heightfield hf, double x, double y, int lod);
+static object3d *create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int py, int lod);
+static object3d *create_mesh_patch_stripped_lod2(heightfield hf, double x, double y, int lod);
 
 static void quadtree_fill(quadtree_node node, void  *hf);
 static void quadtree_set_material(quadtree_node node, void *mat);
@@ -133,7 +133,7 @@ quadtree_render(quadtree_node node, heightfield hf)
 {
   if(node->childs[0] == NULL || node->childs[1] == NULL ||
      node->childs[2] == NULL || node->childs[3] == NULL) {
-    object3d_to_opengl((object3d)node->data);
+    object3d_to_opengl((object3d *)node->data);
     return;
   }
 
@@ -246,7 +246,7 @@ create_zvalues(heightfield hf, char *filename)
 /*This function creates a heightfield of size(1,1,1) and fill the local*/
 /*matrix with a scale matrix*/
 /*lod starts at 0*/
-static object3d
+static object3d *
 create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double sizez, int lod)
 {
   matrix4 local;
@@ -298,7 +298,7 @@ create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double size
 
   matrix4_to_scale(local, sizex, sizey, sizez);
 
-  return object3d_create(local, matrix4_identity, vb, NULL);
+  return object3d_create(matrix4_identity, vb, NULL);
 }
 
 /* #ifdef 0 */
@@ -365,7 +365,7 @@ create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double size
 /* } */
 /* #endif */
 
-static object3d
+static object3d *
 create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int py, int lod)
 {
   matrix4 local;
@@ -404,8 +404,8 @@ create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int p
     for(j = 0; j < hf->patch_sizex-1; j+=step) {
       unsigned int old_k = k+1;	/* Second vertex of the row */
       for(i = 0, u = px*stepu, x = -INTERNAL_CENTER+px*stepx; i < hf->patch_sizex; i+=step, ofs+=step) {
-	vertex_set_coord(&vertices[k], x, y, z[ofs]);
-	vertex_set_coord(&vertices[k+1], x, y-stepy, z[ofs+next_line]);
+	vertex_set_coord(&vertices[k], x*hf->sizex, y*hf->sizey, z[ofs]*hf->sizez);
+	vertex_set_coord(&vertices[k+1], x*hf->sizex, (y-stepy)*hf->sizey, z[ofs+next_line]*hf->sizez);
 	vertex_set_tcoord(&vertices[k], 0, u, v);
 	vertex_set_tcoord(&vertices[k], 1, u, v);
 	vertex_set_tcoord(&vertices[k+1], 0, u, v-stepv);
@@ -427,14 +427,14 @@ create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int p
 
   matrix4_to_scale(local, hf->sizex, hf->sizey, hf->sizez);
 
-  return object3d_create(local, matrix4_identity, vb, NULL);
+  return object3d_create(matrix4_identity, vb, NULL);
 }
 
 /*Transform (px,py) in patch unit coordinate and draw the corresponding patch*/
 /*px=(x+S/2)*N/S */
 /*where: N=number of patch on a row*/
 /*       S=size of the bbox*/
-static object3d
+static object3d *
 create_mesh_patch_stripped_lod2(heightfield hf, double x, double y, int lod)
 {
   int num_patch_x = (hf->w - 1)/(hf->patch_sizex - 1);
@@ -456,25 +456,25 @@ quadtree_fill(quadtree_node node, void  *hf)
 static void
 quadtree_set_material(quadtree_node node, void *mat)
 {
-  object3d_set_material((object3d)node->data, (material)mat);
+  object3d_set_material((object3d *)node->data, (material)mat);
 }
 
 static void
 quadtree_set_world_matrix(quadtree_node node, void *world)
 {
-  object3d_set_world_matrix((object3d)node->data, (double **)world);
+  object3d_set_world_matrix((object3d *)node->data, (double **)world);
 }
 
 static void
 quadtree_set_local_matrix(quadtree_node node, void *local)
 {
-  object3d_set_world_matrix((object3d)node->data, (double **)local);
+  object3d_set_world_matrix((object3d *)node->data, (double **)local);
 }
 
 static void
 quadtree_to_opengl(quadtree_node node, void *data)
 {
-  object3d_to_opengl((object3d)node->data);
+  object3d_to_opengl((object3d *)node->data);
 }
 
 /***********************************************************************/

@@ -5,9 +5,9 @@
 
 typedef enum {CUBE} ObjType;
 
-extern object3d object_factory_create(ObjType type, double size);
+extern object3d *object_factory_create(ObjType type, double size);
 
 /* subdiv_x=number of horizontal quads subdiv_y=vertical quads */
-extern object3d create_plan_xy(double sizex, double sizey, int subdiv_x, int subdiv_y);
+extern object3d *create_plan_xy(double sizex, double sizey, int subdiv_x, int subdiv_y);
 
 #endif

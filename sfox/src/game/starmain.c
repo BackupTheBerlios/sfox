@@ -179,7 +179,7 @@ void init()
   heightfield hf;
   heightfieldinfo hfi;
   skybox sb;
-  object3d plan = create_plan_xy(100, 100, 1, 1);
+  object3d *plan = create_plan_xy(100, 100, 1, 1);
   material mat = material_create(NULL, 0, &color_red, 0, 0);
   matrix4 tmp;
   vector3 cam_pos = {0,0,0};

@@ -6,12 +6,12 @@
 #include "vertexbuffer.h"
 #include "object_factory.h"
 
-static object3d create_cube(double size);
+static object3d *create_cube(double size);
 
-object3d
+object3d *
 object_factory_create(ObjType type, double size)
 {
-  object3d obj;
+  object3d *obj;
 
   switch(type) {
       case CUBE:
@@ -24,7 +24,7 @@ object_factory_create(ObjType type, double size)
   return obj;
 }
 
-object3d
+object3d *
 create_plan_xy(double sizex, double sizey, int subdiv_x, int subdiv_y)
 {
   vertexbuffer vb;
@@ -77,10 +77,10 @@ create_plan_xy(double sizex, double sizey, int subdiv_x, int subdiv_y)
   }
   vertexbuffer_unlock(vb);
 
-  return object3d_create(matrix4_identity, matrix4_identity, vb, NULL);
+  return object3d_create(matrix4_identity, vb, NULL);
 }
 
-static object3d
+static object3d *
 create_cube(double size)
 {
   vertex *vertices;
@@ -172,5 +172,5 @@ create_cube(double size)
 
   vertexbuffer_unlock(vb);
 
-  return object3d_create(matrix4_identity, matrix4_identity, vb, NULL);
+  return object3d_create(matrix4_identity, vb, NULL);
 }
