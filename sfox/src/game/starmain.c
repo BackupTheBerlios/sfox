@@ -182,16 +182,16 @@ void init()
   object3d plan = create_plan_xy(100, 100, 1, 1);
   material mat = material_create(NULL, 0, &color_red, 0, 0);
   matrix4 tmp;
-  vector3 cam_pos = {0,50,0};
+  vector3 cam_pos = {0,0,0};
   vector3 cam_up = {0,1,0};
-  vector3 cam_look = {0,50,-1};
+  vector3 cam_look = {0,0,-1};
   viewport vp = viewport_create(0, 0, display_width(screen), display_height(screen));
 
   /* Camera */
   camfps = camera_create(60, ZFAR, ZNEAR, &cam_pos, &cam_look, &cam_up, vp);
 
   /* Heightfied creation */
-  hf = heightfield_create_from_file("data/height.png", 1000, 1000, 100);
+  hf = heightfield_create_from_file(camfps, "data/height.png", 1000, 1000, 100);
   heightfield_set_textures_from_file(hf, "data/land.jpg", "data/detail.jpg");
   heightfield_set_detail_scale(hf, 50, 50);
   matrix4_to_rot_x(tmp, -90);
@@ -223,9 +223,9 @@ void init()
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 
-  //SDL_WarpMouse(CENTERX,CENTERY);
-  //SDL_WM_GrabInput(SDL_GRAB_ON);
-  //SDL_ShowCursor(SDL_DISABLE);
+  SDL_WarpMouse(CENTERX,CENTERY);
+  SDL_WM_GrabInput(SDL_GRAB_ON);
+  SDL_ShowCursor(SDL_DISABLE);
 }
 
 /*****************************************************************************/
