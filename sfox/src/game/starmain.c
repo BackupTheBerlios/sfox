@@ -71,7 +71,6 @@ print_info()
 {
   fontgl_printf(font, 0, 0, 0, "%.2f FPS",  framework_get_fps());
   fontgl_printf(font, 0, 20, 0, "cam <pos> x:%.2f y:%.2f z:%.2f", camfps->pos.x, camfps->pos.y,camfps->pos.z);
-  fontgl_printf(font, 0, 40, 0, "cam <look> x:%.2f y:%.2f z:%.2f", camfps->look_at.x, camfps->look_at.y,camfps->look_at.z);
   fontgl_printf(font, 0, 80, 0, "Speed factor: %.2f", speed_factor);
 
   /* Frutum tests */
@@ -103,9 +102,9 @@ void
 do_move()
 {
   if(keyboard_is_down(SDLK_UP))
-    camera_move_along_view2(camfps, camvel*speed_factor);
+    camera_move_along_view(camfps, camvel*speed_factor);
   else if(keyboard_is_down(SDLK_DOWN))
-    camera_move_along_view2(camfps, -camvel*speed_factor);
+    camera_move_along_view(camfps, -camvel*speed_factor);
   if(keyboard_is_down(SDLK_LEFT))
     camera_side_move(camfps, -camvel*speed_factor);
   else if(keyboard_is_down(SDLK_RIGHT))
@@ -167,7 +166,7 @@ handle_mouse(SDL_MouseMotionEvent *motion)
   rx = (double)motion->xrel/10.0;
   ry = (double)motion->yrel/10.0;
 
-  camera_mouse_move2(camfps, rx, ry);
+  camera_mouse_move(camfps, rx, ry);
 }
 
 /*****************************************************************************/
@@ -188,14 +187,12 @@ void init()
   skybox sb;
   object3d *plan = create_plan_xy(100, 100, 1, 1);
   material mat = material_create(NULL, 0, &color_red, 0, 0);
-  matrix4 tmp;
   vector3 cam_pos = {0,0,0};
   vector3 cam_up = {0,1,0};
-  vector3 cam_look = {0,0,-1};
   viewport vp = viewport_create(0, 0, display_width(screen), display_height(screen));
 
   /* Camera */
-  camfps = camera_create(60, ZFAR, ZNEAR, &cam_pos, &cam_look, &cam_up, vp);
+  camfps = camera_create(60, ZFAR, ZNEAR, &cam_pos, &cam_up, vp);
 
   /* Heightfied creation */
   hf = heightfield_create_from_file(camfps, "data/height.png", 1000, 1000, 100);
