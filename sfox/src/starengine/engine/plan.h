@@ -10,12 +10,13 @@ typedef struct {
   double d;
 } plane;
 
-inline void plane_set(plane *pl, double nx, double ny, double nz, double d);
-inline void plane_normalize(plane *pl);
+extern void plane_setv(plane *pl, vector3 *normal, double d);
+extern void plane_set(plane *pl, double nx, double ny, double nz, double d);
+extern void plane_normalize(plane *pl);
 
-inline int plane_test_point(plane *pl, double x, double y, double z);
-inline int plane_test_vector3(plane *pl, vector3 *v);
+extern int plane_test_point(plane *pl, double x, double y, double z);
+extern int plane_test_vector3(plane *pl, vector3 *v);
 
-int plane_test_polygon(plane *pl, vector3 *point, unsigned int num);
+extern int plane_test_polygon(plane *pl, vector3 *point, unsigned int num);
 
 #endif

@@ -13,6 +13,13 @@ plane_set(plane *pl, double nx, double ny, double nz, double d)
 }
 
 void
+plane_setv(plane *pl, vector3 *normal, double d)
+{
+  vector3_copy(&pl->normal, normal);
+  pl->d = d;
+}
+
+void
 plane_normalize(plane *pl)
 {
   double norm = vector3_norm(&pl->normal);
