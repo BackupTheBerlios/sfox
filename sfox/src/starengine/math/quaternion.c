@@ -54,6 +54,12 @@ quaternion_from_axis_angle(quaternion *q, double ax, double ay, double az, doubl
 }
 
 void
+quaternion_from_axis_anglev(quaternion *q, vector3 *axis, double theta)
+{
+  quaternion_from_axis_angle(q, axis->x, axis->y, axis->z, theta);
+}
+
+void
 quaternion_from_euler(quaternion *q, double rotx, double roty, double rotz)
 {
   quaternion q1, q2, q3;
@@ -176,3 +182,19 @@ quaternion_rotate_vector(vector3 *dest, const quaternion *q, const vector3 *v)
   dest->y = tmp.y;
   dest->z = tmp.z;
 }
+
+/* void */
+/* quaternion_to_matrix(matrix4 dest, quaternion *q) */
+/* { */
+/*   dest[0][0] = q->w*q->w+q->x*q->x-q->y*q->y-q->z*q->z; */
+/*   dest[0][1] = 2*q->x*q->y - 2*q->w*q->z; */
+/*   dest[0][2] = 2*q->x*q->z + 2*q->w*q->y; */
+
+/*   dest[1][0] = 2*q->x*q->y + 2*q->w*q->z; */
+/*   dest[1][1] = q->w*q->w-q->x2+q->y*q->y-q->z*q->z; */
+/*   dest[1][2] = 2*q->yq->z - 2*q->wq->x; */
+
+/*   dest[2][0] = 2*q->xq->z - 2*q->wq->y; */
+/*   dest[2][1] = 2*q->yq->z + 2*q->wq->x; */
+/*   dest[2][2] = q->w*q->w-q->x2-q->y*q->y+q->z*q->z; */
+/* } */

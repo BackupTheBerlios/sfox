@@ -20,6 +20,7 @@ extern void quaternion_to_identity(quaternion *q);
 
 /* Create a quaternion for an unit axis and an angle*/
 extern void quaternion_from_axis_angle(quaternion *q, double ax, double ay, double az, double theta);
+extern void quaternion_from_axis_anglev(quaternion *q, vector3 *axis, double theta);
 
 /* Create a quaternion from three angles*/
 extern void quaternion_from_euler(quaternion *q, double rotx, double roty, double rotz);
