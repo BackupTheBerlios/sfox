@@ -194,8 +194,8 @@ void init()
   hf = heightfield_create_from_file(camfps, "data/height.png", 1000, 1000, 100);
   heightfield_set_textures_from_file(hf, "data/land.jpg", "data/detail.jpg");
   heightfield_set_detail_scale(hf, 50, 50);
-  matrix4_to_rot_x(tmp, -90);
-  heightfield_set_world_matrix(hf, tmp);
+  //matrix4_to_rot_x(tmp, 90);
+  //heightfield_set_world_matrix(hf, tmp);
 
   /* Heightfield infos*/
   hfi = heightfieldinfo_create("data/land.jpg", hf, camfps, screen, 250, 250);
