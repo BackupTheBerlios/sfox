@@ -1,6 +1,10 @@
 #ifdef _WIN32
 #include <windows.h>
+#include <GL/gl.h>
+#undef far
+#undef near
 #endif /*_WIN32*/
+
 #include <stdio.h>
 
 #include "stargl.h"
@@ -8,6 +12,17 @@
 #include "frustum.h"
 #include "plan.h"
 #include "mathengine.h"
+
+void
+frustum_copy(frustum *dst, frustum *src)
+{
+  plane_copy(&dst->far, &src->far);
+  plane_copy(&dst->near, &src->near);
+  plane_copy(&dst->top, &src->top);
+  plane_copy(&dst->bottom, &src->bottom);
+  plane_copy(&dst->left, &src->left);
+  plane_copy(&dst->right, &src->right);
+}
 
 /* Mark Morley's tutorial on frustum culling */
 void
@@ -51,26 +66,9 @@ frustum_get_from_opengl(frustum *ftm)
   plane_normalize(&ftm->left);
   plane_normalize(&ftm->right);
 
-/*   fprintf(stderr, "LEFT from opengl %f ", ftm->left.d); */
-/*   vector3_print(&ftm->left.normal); */
-/*   fprintf(stderr, "RIGHT from opengl %f ", ftm->right.d); */
-/*   vector3_print(&ftm->right.normal); */
-/*   fprintf(stderr, "TOP from opengl %f ", ftm->top.d); */
-/*   vector3_print(&ftm->top.normal); */
-/*   fprintf(stderr, "BOTTOM from opengl %f ", ftm->bottom.d); */
-/*   vector3_print(&ftm->bottom.normal); */
-/*   fprintf(stderr, "FAR from opengl "); */
-/*   vector3_print(&ftm->far.normal); */
-/*   fprintf(stderr, "\n"); */
-}
-
-void
-frustum_to_frustum2d(frustum2d *ftm2d, frustum *ftm)
-{
-  line2d_set(&ftm2d->left, ftm->left.normal.x, ftm->left.normal.z, ftm->left.d);
-  line2d_set(&ftm2d->right, ftm->right.normal.x, ftm->right.normal.z, ftm->right.d);
-  line2d_set(&ftm2d->front, ftm->far.normal.x, ftm->far.normal.z, ftm->far.d);
-  line2d_set(&ftm2d->back, ftm->near.normal.x, ftm->near.normal.z, ftm->near.d);
+  fprintf(stderr, "OPENGL:\n");
+  frustum_print(ftm);
+  fprintf(stderr, "\n");
 }
 
 int
@@ -92,9 +90,64 @@ frustum_point_is_into(frustum *ftm, double x, double y, double z)
   return 1;
 }
 
+inline void
+frustum_transform(frustum *ftm, matrix4 m, vector3 *pos)
+{
+  vector3 tmp;
+
+  vector3_mul_matrix4(&ftm->far.normal, &ftm->far.normal, m);
+  vector3_mul_matrix4(&ftm->near.normal, &ftm->near.normal, m);
+  vector3_mul_matrix4(&ftm->top.normal, &ftm->top.normal, m);
+  vector3_mul_matrix4(&ftm->bottom.normal, &ftm->bottom.normal, m);
+  vector3_mul_matrix4(&ftm->left.normal, &ftm->left.normal, m);
+  vector3_mul_matrix4(&ftm->right.normal, &ftm->right.normal, m);
+  vector3_mul_matrix4(&tmp, pos, m);
+  //  vector3_print(&tmp);
+
+  ftm->top.d = -vector3_dot(&ftm->top.normal, &tmp);
+  ftm->bottom.d = -vector3_dot(&ftm->bottom.normal, &tmp);
+  ftm->near.d = -vector3_dot(&ftm->near.normal, &tmp);
+  ftm->far.d = -vector3_dot(&ftm->far.normal, &tmp);
+  ftm->left.d = -vector3_dot(&ftm->left.normal, &tmp);
+  ftm->right.d = -vector3_dot(&ftm->right.normal, &tmp);
+}
+
+void
+frustum_transform_and_copy(frustum *dst, frustum *ftm, matrix4 m, vector3 *pos)
+{
+  frustum_copy(dst, ftm);
+  frustum_transform(dst, m, pos);
+}
+
+void
+frustum_print(frustum *ftm)
+{
+  fprintf(stderr, "LEFT: ");
+  plane_print(&ftm->left);
+  fprintf(stderr, "RIGHT: ");
+  plane_print(&ftm->right);
+  fprintf(stderr, "TOP: ");
+  plane_print(&ftm->top);
+  fprintf(stderr, "BOTTOM: ");
+  plane_print(&ftm->bottom);
+  fprintf(stderr, "FAR: ");
+  plane_print(&ftm->far);
+  fprintf(stderr, "NEAR: ");
+  plane_print(&ftm->near);
+}
+
 /***********************************************************************/
 /* Frustum2d functions                                                 */
 /***********************************************************************/
+
+void
+frustum_to_frustum2d(frustum2d *ftm2d, frustum *ftm)
+{
+  line2d_set(&ftm2d->left, ftm->left.normal.x, ftm->left.normal.y, ftm->left.d);
+  line2d_set(&ftm2d->right, ftm->right.normal.x, ftm->right.normal.y, ftm->right.d);
+  line2d_set(&ftm2d->front, ftm->far.normal.x, ftm->far.normal.y, ftm->far.d);
+  line2d_set(&ftm2d->back, ftm->near.normal.x, ftm->near.normal.y, ftm->near.d);
+}
 
 int
 frustum2d_point_is_into(frustum2d *ftm, double x, double y)
