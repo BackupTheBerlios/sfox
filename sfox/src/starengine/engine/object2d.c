@@ -10,19 +10,11 @@
 #include "material.h"
 #include "vertexbuffer.h"
 
-/* struct object2d { */
-/*   matrix4 world; */
-/*   material mat; */
-
-/*   vertexbuffer vb; */
-/*   float width, height; */
-/* }; */
-
 /**********************************************************************/
 /* Static declarations                                                */
 /**********************************************************************/
 
-/*Create a 1x1 quad*/
+/*Create a sizexxsizey quad*/
 static vertexbuffer create_quad(float sizex, float sizey);
 
 /**********************************************************************/

@@ -5,7 +5,6 @@
 #include "material.h"
 #include "vertexbuffer.h"
 
-//typedef struct object2d *object2d;
 typedef struct object2d {
   matrix4 world;
   material mat;
