@@ -121,7 +121,7 @@ quadtree_render(quadtree_node node, heightfield hf)
 
   if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[0]->box))
      quadtree_render(node->childs[0], hf);
-  if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[1]->box)) 
+  if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[1]->box))
      quadtree_render(node->childs[1], hf);
   if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[2]->box))
      quadtree_render(node->childs[2], hf);
@@ -218,12 +218,12 @@ create_mesh_patch_stripped_lod_list(heightfield hf, float x, float y, int px, in
   object3d *obj = object3d_create(matrix4_identity, NULL, NULL);
   unsigned int w, h, step;
 
-  px *= hf->patch_sizex-1;
-  py *= hf->patch_sizex-1;
-
   w = hf->w;
   h = hf->h;
   step = (1<<lod);
+
+  px *= hf->patch_sizex-1;
+  py *= hf->patch_sizex-1;
   
   {
     float *z = hf->zvalues;
@@ -233,15 +233,16 @@ create_mesh_patch_stripped_lod_list(heightfield hf, float x, float y, int px, in
     float stepv = -(float)step/h;
     float stepx = step*hf->sizex/w;
     float stepy = step*hf->sizey/h;
-    float u, v = -py*stepv;
+    float u, v = -py*stepv/step;
+    float startx = -hf->sizex/2+px*stepx/step;
+    float startu = px*stepu/step;
 
-    //printf("x=%f y=%f newx=%f newy=%f\n", x, y, -hf->sizex/2+px*stepx, -hf->sizey/2+py*stepy);
-    y = -hf->sizey/2+py*stepy;
+    y = -hf->sizey/2+py*stepy/step;
 
     object3d_BeginList(obj);
     object3d_Begin(GL_TRIANGLE_STRIP);
     for(j = 0; j < hf->patch_sizex-1; j+=step) {
-      for(i = 0, u = px*stepu, x = -hf->sizex/2+px*stepx; i < hf->patch_sizex; i+=step, ofs+=step) {
+      for(i = 0, u = startu, x = startx; i < hf->patch_sizex; i+=step, ofs+=step) {
 	object3d_MultiTexCoord2f(0, u, v);
 	object3d_MultiTexCoord2f(1, u, v);
 	object3d_Vertex3f(x, z[ofs], y);
@@ -256,7 +257,7 @@ create_mesh_patch_stripped_lod_list(heightfield hf, float x, float y, int px, in
       object3d_Vertex3f(x-stepx, z[next_line+(ofs-step)], y+stepy);
       object3d_MultiTexCoord2f(0, px*stepu, v-stepv);
       object3d_MultiTexCoord2f(1, px*stepu, v-stepv);
-      object3d_Vertex3f(-hf->sizex/2+px*stepx, z[(ofs-step*i)+next_line], y+stepy);
+      object3d_Vertex3f(startx, z[ofs-i+next_line], y+stepy);
       ofs += next_line-hf->patch_sizex-(step-1);
       v -= stepv;
       y += stepy;
