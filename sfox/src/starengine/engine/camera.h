@@ -6,18 +6,29 @@
 #include "frustum.h"
 
 typedef struct camera {
-  vector3 look_at;
   vector3 up;
   vector3 pos;
+  quaternion orientation;
+  matrix4 view_matrix;
+
   frustum ftm;                  /* Initialised in camera_to_opengl */
+  viewport vp;
+  double fov, znear, zfar;
+  matrix4 projection_matrix;
+
+  unsigned int need_update;
+
+  float max_pitch, max_yaw, max_roll; /* Absolute max */
+  float pitch, yaw, roll;
 } *camera;
 
-extern camera camera_create(double fov, double zfar, double znear, vector3 *pos, vector3 *look_at, vector3 *up, viewport vp);
+#define CAM_UNLIMITED -1
+
+extern camera camera_create(double fov, double zfar, double znear, vector3 *pos, vector3 *up, viewport vp);
 /* Destroy the viewport */
 extern void camera_destroy(camera cam);
 extern void camera_to_opengl(camera cam);
 
-extern void camera_set_look_at(camera cam, vector3 *look_at);
 extern void camera_set_pos(camera cam, double x, double y, double z);
 
 /*Function for fps-like camera */
@@ -28,13 +39,9 @@ extern void camera_mouse_move(camera cam, double xrel, double yrel);
 extern void camera_move_along_view(camera cam, double speed);
 /*Strafe*/
 extern void camera_side_move(camera cam, double speed);
-/* We stop moving the view up or down at angle angle (in DEG) */
-extern void camera_set_max_theta(camera cam, double angle);
+
+extern void camera_set_max_ypr(camera cam, float yaw, float pitch, float roll);
 
 extern void camera_update_frustum(camera cam);
-
-
-extern void camera_mouse_move2(camera gcam, double xrel, double yrel);
-extern void camera_move_along_view2(camera cam, double speed);
 
 #endif
