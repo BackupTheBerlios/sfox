@@ -67,12 +67,11 @@ heightfieldinfo_to_opengl(heightfieldinfo hfi)
   glTranslatef(0.5, 0.5, 0);
 
   /*cam space -> heightfield space*/
-  matrix4_mul(inv, *heightfield_get_local_matrix(hfi->hf), *heightfield_get_world_matrix(hfi->hf));
-  matrix4_to_inverse(inv);
+  matrix4_get_inverse(inv, *heightfield_get_world_matrix(hfi->hf));
   vector3_mul_matrix4(&pos, &cam->pos, inv);
 
-  cellx = ((int)((pos.x+0.5)*256)/16)/16.0-0.5;
-  celly = ((int)((pos.y+0.5)*256)/16)/16.0-0.5;
+  cellx = ((int)((pos.x/1000+0.5)*256)/16)/16.0-0.5;
+  celly = ((int)((pos.y/1000+0.5)*256)/16)/16.0-0.5;
 
   /*  fprintf(stderr, "%f %f %f %f\n", pos.x, pos.y, cellx, celly);*/
   /*  fprintf(stderr, "%d %d\n", (int)((pos.x+0.5)*256)/16, (int)((pos.y+0.5)*256)/16);*/
