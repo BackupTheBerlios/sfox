@@ -60,6 +60,7 @@ static object3d *create_mesh_stripped_lod(heightfield hf, double sizex,
 //static object3d create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod);
 static object3d *create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int py, int lod);
 static object3d *create_mesh_patch_stripped_lod2(heightfield hf, double x, double y, int lod);
+static object3d *create_mesh_patch_stripped_lod_list(heightfield hf, double x, double y, int px, int py, int lod);
 
 static void quadtree_fill(quadtree_node node, void  *hf);
 static void quadtree_set_material(quadtree_node node, void *mat);
@@ -120,9 +121,9 @@ heightfield_to_opengl(heightfield hf)
   hf->ftm2d = &ftm2d;
 
 
-  printf("TRANS:\n");
-  frustum_print(&ftm);
-  printf("\n");
+  //  printf("TRANS:\n");
+  //frustum_print(&ftm);
+  //printf("\n");
 
   quadtree_render(hf->quadtree, hf);
   //  quadtree_foreach_leaf(hf->quadtree, hf, quadtree_to_opengl);
@@ -396,7 +397,6 @@ create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int p
     double stepx = (double)step/w;
     double stepy = (double)step/h;
     double u, v = -py*stepv;
-    double oldx = x;
     y = INTERNAL_CENTER-py*stepy;
     //printf("oldx= %f newx=%f\n", x = -INTERNAL_CENTER+px*stepx, x);
 
@@ -414,6 +414,7 @@ create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int p
 	x += stepx;
 	u += stepu;
       }
+      printf("%f %f %f\n", vertices[old_k].coord.x, vertices[old_k].coord.y, vertices[old_k].coord.z);      
       ofs += next_line-hf->patch_sizex-(step-1);
       vertex_copy(&vertices[k], &vertices[k-1]);
       vertex_copy(&vertices[k+1], &vertices[old_k]);
@@ -430,6 +431,62 @@ create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int p
   return object3d_create(matrix4_identity, vb, NULL);
 }
 
+/*Use display lists for patches*/
+static object3d *
+create_mesh_patch_stripped_lod_list(heightfield hf, double x, double y, int px, int py, int lod)
+{
+  object3d *obj = object3d_create(matrix4_identity, NULL, NULL);
+  unsigned int w, h, step;
+
+  px *= hf->patch_sizex-1;
+  py *= hf->patch_sizex-1;
+
+  w = hf->w;
+  h = hf->h;
+  step = (1<<lod);
+
+  {
+    double *z = hf->zvalues;
+    unsigned int i, j, ofs = px+py*w;
+    unsigned int next_line = step*w;
+    double stepu = (double)step/w;
+    double stepv = -(double)step/h;
+    double stepx = (double)step/w;
+    double stepy = (double)step/h;
+    double u, v = -py*stepv;
+    
+    y = INTERNAL_CENTER-py*stepy;
+
+    object3d_BeginList(obj);
+    object3d_Begin(GL_TRIANGLE_STRIP);
+    for(j = 0; j < hf->patch_sizex-1; j+=step) {
+      for(i = 0, u = px*stepu, x = -INTERNAL_CENTER+px*stepx; i < hf->patch_sizex; i+=step, ofs+=step) {
+	object3d_MultiTexCoord2f(0, u, v);
+	object3d_MultiTexCoord2f(1, u, v);
+	object3d_Vertex3f(x*hf->sizex, y*hf->sizey, z[ofs]*hf->sizez);
+	object3d_MultiTexCoord2f(0, u, v-stepv);
+	object3d_MultiTexCoord2f(1, u, v-stepv);
+	object3d_Vertex3f(x*hf->sizex, (y-stepy)*hf->sizey, z[ofs+next_line]*hf->sizez);
+	x += stepx;
+	u += stepu;
+      }
+      object3d_MultiTexCoord2f(0, u-stepu, v);
+      object3d_MultiTexCoord2f(1, u-stepu, v);
+      object3d_Vertex3f((x-stepx)*hf->sizex, (y-stepy)*hf->sizey, z[next_line+(ofs-step)]*hf->sizez);
+      object3d_MultiTexCoord2f(0, px*stepu, v-stepv);
+      object3d_MultiTexCoord2f(1, px*stepu, v-stepv);
+      object3d_Vertex3f((-INTERNAL_CENTER+px*stepx)*hf->sizex, (y-stepy)*hf->sizey, z[(ofs-step*i)+next_line]*hf->sizez);
+      ofs += next_line-hf->patch_sizex-(step-1);
+      v -= stepv;
+      y -= stepy;
+    }
+    object3d_End();
+    object3d_EndList();
+  }
+
+  return obj;
+}
+
 /*Transform (px,py) in patch unit coordinate and draw the corresponding patch*/
 /*px=(x+S/2)*N/S */
 /*where: N=number of patch on a row*/
@@ -442,9 +499,9 @@ create_mesh_patch_stripped_lod2(heightfield hf, double x, double y, int lod)
   int cellx = (int)((x+INTERNAL_CENTER)*num_patch_x/INTERNAL_SIZE);
   int celly = (int)((-y+INTERNAL_CENTER)*num_patch_y/INTERNAL_SIZE);
 
-  printf("%d %d %f %f\n", cellx, celly, x, y);
+  //printf("%d %d %f %f\n", cellx, celly, x, y);
   
-  return create_mesh_patch_stripped_lod(hf, x, y, cellx, celly, lod);
+  return create_mesh_patch_stripped_lod_list(hf, x, y, cellx, celly, lod);
 }
 
 static void
