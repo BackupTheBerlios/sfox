@@ -6,7 +6,7 @@
 
 #include "vertex.h"
 
-typedef enum {VB_SYSTEM=0, VB_STATIC_DRAW, VB_DYNAMIC_DRAW} vertexbuffer_type;
+typedef enum {VB_SYSTEM=0, VB_STATIC_DRAW, VB_DYNAMIC_DRAW, VB_LIST} vertexbuffer_type;
 typedef enum {TRIANGLES_INDEXED = 0, TRIANGLES_STRIP} vertices_type;
 
 typedef struct vertexbuffer *vertexbuffer;
@@ -29,6 +29,13 @@ extern unsigned int vertexbuffer_get_num_vertices(vertexbuffer vb);
 extern void vertexbuffer_to_opengl(vertexbuffer vb);
 
 extern void vertexbuffer_bind(vertexbuffer vb);
+
+/*Warper around OpenGL direct mode for VB_LIST*/
+extern void vertexbuffer_Begin(vertexbuffer vb, unsigned int type);
+extern void vertexbuffer_End(vertexbuffer vb);
+extern void vertexbuffer_MultiTexCoord2f(vertexbuffer vb, int texunit, float u, float v);
+extern void vertexbuffer_TexCoord2f(vertexbuffer vb, float u, float v);
+extern void vertexbuffer_Vertex3f(vertexbuffer vb, float x, float y, float z);
 
 
 #endif

@@ -32,9 +32,6 @@ object3d_init(object3d *obj, matrix4 world, vertexbuffer vb, material mat)
   matrix4_copy(obj->world, world);
   obj->vb = vb;
   obj->mat = mat;
-
-  if(vb == NULL)
-    obj->list = glGenLists(1);
 }
 
 void
@@ -61,62 +58,18 @@ object3d_free(object3d *obj, DestroyFlag flag)
 void
 object3d_to_opengl(object3d *obj)
 {
-  assert(obj);
+  if(!obj->vb)
+    return;
+
   glPushMatrix();		/* Should be somewhere else in a loop */
 
   glMultMatrixf((float *)obj->world);
   if(obj->mat)
     material_to_opengl(obj->mat);
   
-  if(obj->vb)
-    vertexbuffer_to_opengl(obj->vb);
-  else
-    glCallList(obj->list);
+  vertexbuffer_to_opengl(obj->vb);
 
   glPopMatrix();
-}
-
-void
-object3d_BeginList(object3d *obj)
-{
-  assert(!obj->vb);
-  glNewList(obj->list, GL_COMPILE);
-}
-
-void
-object3d_EndList()
-{
-  glEndList();
-}
-
-void
-object3d_Begin(unsigned int type)
-{
-  glBegin(type);
-}
-
-void
-object3d_End()
-{
-  glEnd();
-}
-
-void
-object3d_Vertex3f(float x, float y, float z)
-{
-  glVertex3f(x, y, z);
-}
-
-void
-object3d_TexCoord2f(float u, float v)
-{
-  glTexCoord2f(u, v);
-}
-
-void
-object3d_MultiTexCoord2f(int texunit, float u, float v)
-{
-  glMultiTexCoord2f(GL_TEXTURE0+texunit, u, v);
 }
 
 /************************************************************************/

@@ -27,16 +27,6 @@ extern void object3d_free(object3d *obj, DestroyFlag flag);
 
 extern void object3d_to_opengl(object3d *obj);
 
-extern void object3d_BeginList(object3d *obj);
-extern void object3d_EndList();
-
-/*Warper around OpenGL direct mode*/
-extern void object3d_Begin(unsigned int type);
-extern void object3d_End();
-extern void object3d_TexCoord2f(float u, float v);
-extern void object3d_Vertex3f(float x, float y, float z);
-extern void object3d_MultiTexCoord2f(int texunit, float u, float v);
-
 extern void object3d_set_material(object3d *obj, material mat);
 extern material object3d_get_material(object3d *obj);
 
