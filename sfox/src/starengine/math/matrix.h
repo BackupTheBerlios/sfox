@@ -10,8 +10,8 @@ typedef double matrix4[4][4];
 #define MATRIX4_ZERO \
   {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}
 
-extern const matrix4 matrix4_identity;
-extern const matrix4 matrix4_zero;
+extern matrix4 matrix4_identity;
+extern matrix4 matrix4_zero;
 
 extern inline void matrix4_copy(matrix4 dst, matrix4 src);
 

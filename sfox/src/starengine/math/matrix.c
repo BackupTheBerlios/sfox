@@ -7,8 +7,8 @@
 #include "matrix.h"
 #include "mathmacro.h"
 
-const matrix4 matrix4_identity = MATRIX4_IDENTITY;
-const matrix4 matrix4_zero = MATRIX4_ZERO;
+matrix4 matrix4_identity = MATRIX4_IDENTITY;
+matrix4 matrix4_zero = MATRIX4_ZERO;
 
 void
 matrix4_to_scale(matrix4 dst, double sx, double sy, double sz)
