@@ -1,1 +1,1 @@
-SUBDIRS=engine framework math
+SUBDIRS=engine starutils framework math

@@ -1,13 +1,14 @@
 #ifdef _WIN32
-#include <windows.h>
+# include <windows.h>
 #endif /*_WIN32*/
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <glib.h>
 
 #include "stargl.h"
+#include "starutils.h"
 
 #include "scene.h"
 #include "camera.h"
@@ -22,15 +23,15 @@ struct rendering_elem {
 struct scene {
   camera cam;
   display disp;			/* Needed for 2d rendering */
-  GSList *render_list;
-  GSList *render2d_list;
+  SSList *render_list;
+  SSList *render2d_list;
 };
 
 /**********************************************************************/
 /* Static declarations                                                */
 /**********************************************************************/
 
-static void glist_to_opengl(GSList *list);
+static void slist_to_opengl(SSList *list);
 static struct rendering_elem *create_rendering_elem(void *object, renderfunc func, void *data);
 static void scene3d_to_opengl(scene scn);
 static void scene2d_to_opengl(scene scn);
@@ -63,7 +64,7 @@ scene_add_object(scene scn, void *object, renderfunc func, void *data)
 {
   struct rendering_elem *elem = create_rendering_elem(object, func, data);
 
-  scn->render_list = g_slist_append(scn->render_list, elem);
+  scn->render_list = s_slist_append(scn->render_list, elem);
 }
 
 void
@@ -71,7 +72,7 @@ scene_add_object2d(scene scn, void *object, renderfunc func, void *data)
 {
   struct rendering_elem *elem = create_rendering_elem(object, func, data);
   
-  scn->render2d_list = g_slist_append(scn->render2d_list, elem);
+  scn->render2d_list = s_slist_append(scn->render2d_list, elem);
 }
 
 
@@ -92,14 +93,14 @@ scene_set_display(scene scn, display disp)
 /***********************************************************************/
 
 static void
-glist_to_opengl(GSList *list)
+slist_to_opengl(SSList *list)
 {
   while(list) {
     struct rendering_elem *rel = (struct rendering_elem *)list->data;
     glPushMatrix();
     rel->to_opengl_func(rel->object);
     glPopMatrix();
-    list = g_slist_next(list);
+    list = s_slist_next(list);
   }
 }
 
@@ -122,7 +123,7 @@ scene3d_to_opengl(scene scn)
     return;
 
   camera_to_opengl(scn->cam);
-  glist_to_opengl(scn->render_list);
+  slist_to_opengl(scn->render_list);
 }
 
 static void
@@ -140,7 +141,7 @@ scene2d_to_opengl(scene scn)
   glPushMatrix();	/* Not needed, here only for experimenting frustum*/
   glLoadIdentity();
 
-  glist_to_opengl(scn->render2d_list);
+  slist_to_opengl(scn->render2d_list);
   
   glMatrixMode(GL_PROJECTION);
    glPopMatrix();

@@ -1,8 +1,7 @@
 #ifdef _WIN32
 # include <windows.h>
-# include "stargl.h"
+# include <GL/gl.h>
 # include "starglext.h"
-# include "starglaux.h"
 #endif /*_WIN32*/
 
 #include <string.h>
@@ -10,9 +9,9 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <assert.h>
-#include <glib.h>
 
 #include "starengine.h"
+#include "starutils.h"
 #include "stargl.h"
 #include "starglu.h"
 
@@ -32,7 +31,7 @@ static const GLuint pixel_format[] = { GL_RGB, GL_RGBA, GL_ALPHA };
 
 struct texture {
   GLuint tex_name;
-  GSList *texture_env;
+  SSList *texture_env;
   matrix4 m;
 };
 
@@ -88,7 +87,7 @@ void
 texture_destroy(texture tex)
 {
   glDeleteTextures(1, &tex->tex_name);
-  g_slist_free(tex->texture_env);
+  s_slist_free(tex->texture_env);
   tex->texture_env = NULL;
 
   free(tex);
@@ -103,8 +102,8 @@ texture_set_matrix(texture tex, matrix4 m)
 void
 texture_add_texture_env(texture tex, unsigned int pname, unsigned int param)
 {
-  tex->texture_env = g_slist_append(tex->texture_env, GUINT_TO_POINTER(pname));
-  tex->texture_env = g_slist_append(tex->texture_env, GUINT_TO_POINTER(param));
+  tex->texture_env = s_slist_append(tex->texture_env, SUINT_TO_POINTER(pname));
+  tex->texture_env = s_slist_append(tex->texture_env, SUINT_TO_POINTER(param));
 }
 
 void
@@ -136,16 +135,16 @@ texture_to_opengl(texture tex)
 static void
 texture_env_to_opengl(texture tex)
 {
-  GSList *elem = tex->texture_env;
+  SSList *elem = tex->texture_env;
   unsigned int pname, param;
 
   while(elem) {
     pname = (unsigned int)elem->data;
-    elem = g_slist_next(elem);
+    elem = s_slist_next(elem);
     assert(elem);
     param = (unsigned int)elem->data;
     glTexEnvi(GL_TEXTURE_ENV, pname, param);  
-    elem = g_slist_next(elem);
+    elem = s_slist_next(elem);
   }    
 
 }
