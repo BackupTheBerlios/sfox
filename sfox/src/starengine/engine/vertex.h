@@ -5,6 +5,7 @@
 #include "color.h"
 #include "vector3.h"
 
+/*Don't change the order(will break vertexbuffer.c) */
 typedef struct vertex {
   vector3 coord;
   vector2 tcoord[MAX_TEXTURES];
