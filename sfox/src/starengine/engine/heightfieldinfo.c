@@ -22,9 +22,10 @@
 #define CELLSIZE 1.0/16.0
 
 struct heightfieldinfo {
+  object2d obj;
+
   heightfield hf;
   camera cam;
-  object2d obj;
 };
 
 heightfieldinfo
@@ -32,11 +33,11 @@ heightfieldinfo_create(char *landmap, heightfield hf, camera cam, display disp, 
 { 
   matrix4 world;
   heightfieldinfo hfi = malloc(sizeof(struct heightfieldinfo));
+    
 
   matrix4_to_translate(world, display_width(disp)-sizex,
 		       display_height(disp)-sizey, 0);
-  hfi->obj = object2d_create(sizex, sizey, matrix4_identity, world,
-			   material_create_single_texture_from_file(landmap));
+  object2d_init(SF_OBJECT2D(hfi), sizex, sizey, world, material_create_single_texture_from_file(landmap));
   hfi->cam = cam;
   hfi->hf = hf;
 
@@ -58,12 +59,12 @@ heightfieldinfo_to_opengl(heightfieldinfo hfi)
   glDisable(GL_CULL_FACE);
   glDisable(GL_DEPTH_TEST);
 
-  object2d_to_opengl(hfi->obj);
+  object2d_to_opengl(SF_OBJECT2D(hfi));
 
   /*Now 0,0 is the center of the minimap*/
-  glLoadMatrixd((double *)*object2d_get_world_matrix(hfi->obj));
-  glMultMatrixd((double *)*object2d_get_local_matrix(hfi->obj));
-  glTranslated(0.5, 0.5, 0);
+  glLoadMatrixd((double *)*object2d_get_world_matrix(SF_OBJECT2D(hfi)));
+  glScalef(SF_OBJECT2D(hfi)->width, SF_OBJECT2D(hfi)->height, 1);
+  glTranslatef(0.5, 0.5, 0);
 
   /*cam space -> heightfield space*/
   matrix4_mul(inv, *heightfield_get_local_matrix(hfi->hf), *heightfield_get_world_matrix(hfi->hf));
@@ -105,11 +106,6 @@ heightfieldinfo_to_opengl(heightfieldinfo hfi)
 void
 heightfieldinfo_destroy(heightfieldinfo hfi)
 {
-  object2d_destroy(hfi->obj);
+  object2d_destroy(SF_OBJECT2D(hfi));
   free(hfi);
-}
-
-static int
-is_viewable(frustum2d *ftm, double cellx, double celly)
-{
 }
