@@ -5,4 +5,4 @@ libengine_a_SOURCES=viewport.c camera.c vertexbuffer.c vertex.c object3d.c \
                     color.c material.c texture.c object_factory.c \
                     dds.c heightfield.c skybox.c fontgl.c \
                     scene.c plan.c frustum.c heightfieldinfo.c object2d.c \
-                    line.c bbox.c
+                    line.c bbox.c utility.c
