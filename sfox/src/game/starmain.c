@@ -188,7 +188,7 @@ void init()
   viewport vp = viewport_create(0, 0, display_width(screen), display_height(screen));
 
   /* Camera */
-  camfps = camera_create(60, ZFAR, ZNEAR, &cam_pos, &cam_look, &cam_up, vp);
+  camfps = camera_create(45, ZFAR, ZNEAR, &cam_pos, &cam_look, &cam_up, vp);
 
   /* Heightfied creation */
   hf = heightfield_create_from_file(camfps, "data/height.png", 1000, 1000, 100);
