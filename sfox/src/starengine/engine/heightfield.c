@@ -227,3 +227,53 @@ create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double size
 
   return object3d_create(local, matrix4_identity, vb, NULL);
 }
+
+/***********************************************************************/
+/* Trash                                                               */
+/***********************************************************************/
+
+#if 0
+static object3d
+create_mesh_indexed(heightfield hf, double sizex, double sizey, double sizez)
+{
+  matrix4 local;
+  object3d obj;
+  unsigned int pitch;
+  int w,h;
+  vertexbuffer vb;
+
+  w = hf->w;
+  h = hf->h;
+
+  /*  obj = create_plan_xz(sizex, sizey, w-1, h-1);*/
+  obj = create_plan_xy(1, 1, w-1, h-1);
+  vb = object3d_get_vertexbuffer(obj);
+
+  vertexbuffer_lock(vb);
+  {
+    vertex *vertices = vertexbuffer_get_vertices(vb);
+    unsigned int i, j, ofs = 0;
+    double u=0,v=0;
+    double stepu = 1.0/(w-1);
+    double stepv = 1.0/(h-1);
+
+    for(j=0; j < h; j++) {
+      for(i=0; i < w; i++) {
+	vertices[ofs].coord.z = hf->zvalues[ofs];
+	vertex_set_tcoord(&vertices[ofs], 0, u, v);
+	vertex_set_tcoord(&vertices[ofs], 1, u, v);
+	u+=stepu;
+	ofs++;
+      }
+      u=0;
+      v+=stepv;
+    }
+  }
+  vertexbuffer_unlock(vb);
+
+  matrix4_to_scale(local, sizex, sizey, sizez);
+  object3d_set_local_matrix(obj, local);
+
+  return obj;
+}
+#endif

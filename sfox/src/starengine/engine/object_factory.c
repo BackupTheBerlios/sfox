@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 
@@ -30,7 +31,7 @@ create_plan_xy(double sizex, double sizey, int subdiv_x, int subdiv_y)
 
   assert(subdiv_x>0&&subdiv_y>0);
 
-  vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_INDEXED, (subdiv_x+1)*(subdiv_y+1), subdiv_x*subdiv_y*6);
+  vb = vertexbuffer_create(VB_STATIC_DRAW, TRIANGLES_INDEXED, (subdiv_x+1)*(subdiv_y+1), subdiv_x*subdiv_y*6);
 
   vertexbuffer_lock(vb);
   {
