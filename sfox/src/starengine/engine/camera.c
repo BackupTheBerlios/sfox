@@ -150,7 +150,7 @@ camera_update_frustum(camera cam)
   /*Far and Near planes*/
   {
     double d_dot_e = vector3_dot(&D, E);
-    plane_setv(&lcam->ftm.far, &D, d_dot_e-far );
+    plane_setv(&lcam->ftm.far, &D, -(d_dot_e-far) );
     vector3_scale(&tmp1, &D, -1);
     plane_setv(&lcam->ftm.near, &tmp1, d_dot_e+near );
   }

@@ -2,6 +2,8 @@
 /*automatically, heightfield should be derived from object3d*/
 /*Continue quadtree_render*/
 /*far and near must be calculated correctly in frustum_transform_and_copy*/
+/*BUG: when the camera is at y=0 everything is ok*/
+/*y!=0 culling culls too much*/
 #ifdef _WIN32
 # include <windows.h>
 # include <GL/gl.h>
@@ -107,8 +109,6 @@ heightfield_to_opengl(heightfield hf)
   matrix4_mul(inv, hf->local, hf->world);
   matrix4_to_inverse(inv);
   frustum_transform_and_copy(&ftm, &hf->cam->ftm, inv, &hf->cam->pos);
-  ftm.near.d = -0.05;
-  ftm.far.d = 1000;
 
   frustum_to_frustum2d(&ftm2d, &ftm);
   hf->ftm2d = &ftm2d;
@@ -234,7 +234,7 @@ create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double size
   step = (1<<lod);
 
   num_vert = (unsigned int)((2*ceil((double)w/step)+2)*(ceil((double)h/step)-1));
-  vb = vertexbuffer_create(VB_STATIC_DRAW, TRIANGLES_STRIP, num_vert, 0);
+  vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_STRIP, num_vert, 0);
 
   vertexbuffer_lock(vb);
   {

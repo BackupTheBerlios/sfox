@@ -37,7 +37,7 @@ extern void frustum_transform_and_copy(frustum *dst, frustum *ftm, matrix4 m, ve
 extern void frustum_print(frustum *ftm);
 
 
-/*Project the frustum on the xz plane*/
+/*Project the frustum on the xy plane*/
 extern void frustum_to_frustum2d(frustum2d *ftm2d, frustum *ftm);
 extern int frustum2d_point_is_into(frustum2d *ftm, double x, double y);
 extern int frustum2d_bbox_is_into(frustum2d *ftm2d, bbox2d *bb);

@@ -106,8 +106,8 @@ frustum_transform(frustum *ftm, matrix4 m, vector3 *pos)
 
   ftm->top.d = -vector3_dot(&ftm->top.normal, &tmp);
   ftm->bottom.d = -vector3_dot(&ftm->bottom.normal, &tmp);
-  ftm->near.d = -vector3_dot(&ftm->near.normal, &tmp);
-  ftm->far.d = -vector3_dot(&ftm->far.normal, &tmp);
+  ftm->near.d = (-vector3_dot(&ftm->near.normal, &tmp)+0.002f);
+  ftm->far.d = -vector3_dot(&ftm->far.normal, &tmp)+3;
   ftm->left.d = -vector3_dot(&ftm->left.normal, &tmp);
   ftm->right.d = -vector3_dot(&ftm->right.normal, &tmp);
 }
