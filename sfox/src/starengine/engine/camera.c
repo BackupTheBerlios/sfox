@@ -188,9 +188,9 @@ camera_update_frustum(camera cam)
   vector3_normalise(&lcam->ftm.bottom.normal, &lcam->ftm.bottom.normal);
   lcam->ftm.bottom.d = -vector3_dot(&lcam->ftm.bottom.normal, E);
 
-  //printf("CAMERA:\n");
-  //frustum_print(&lcam->ftm);
-  //printf("\n");
+/*   printf("CAMERA:\n"); */
+/*   frustum_print(&lcam->ftm); */
+/*   printf("\n"); */
 }
 
 /***********************************************************************/
