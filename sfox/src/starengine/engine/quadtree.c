@@ -2,8 +2,17 @@
 
 #include "quadtree.h"
 
+static quadtree_node do_create(double tlx, double tly, double brx, double bry, unsigned int level);
+
 quadtree_node
 quadtree_create(double tlx, double tly, double brx, double bry, unsigned int level)
+{
+  return do_create(tlx, tly, brx, bry, level+1);
+}
+
+/* Really create the quadtree */
+static quadtree_node
+do_create(double tlx, double tly, double brx, double bry, unsigned int level)
 {
   quadtree_node root;
   double midx = (brx+tlx)/2.0f;
@@ -15,10 +24,10 @@ quadtree_create(double tlx, double tly, double brx, double bry, unsigned int lev
   root = calloc(1, sizeof(struct s_quadtree_node));
   bbox2d_set(&root->box, tlx, tly, brx, bry);
 
-  root->childs[0] = quadtree_create(tlx, tly, midx, midy, level-1);
-  root->childs[1] = quadtree_create(midx, tly, brx, midy, level-1);
-  root->childs[2] = quadtree_create(tlx, midy, midx, bry, level-1);
-  root->childs[3] = quadtree_create(midx, midy, brx, bry, level-1);
+  root->childs[0] = do_create(tlx, tly, midx, midy, level-1);
+  root->childs[1] = do_create(midx, tly, brx, midy, level-1);
+  root->childs[2] = do_create(tlx, midy, midx, bry, level-1);
+  root->childs[3] = do_create(midx, midy, brx, bry, level-1);
 
   return root;
 }
