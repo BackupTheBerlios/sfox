@@ -6,10 +6,10 @@
 #include "vertexbuffer.h"
 #include "object_factory.h"
 
-static object3d *create_cube(double size);
+static object3d *create_cube(float size);
 
 object3d *
-object_factory_create(ObjType type, double size)
+object_factory_create(ObjType type, float size)
 {
   object3d *obj;
 
@@ -25,7 +25,7 @@ object_factory_create(ObjType type, double size)
 }
 
 object3d *
-create_plan_xy(double sizex, double sizey, int subdiv_x, int subdiv_y)
+create_plan_xy(float sizex, float sizey, int subdiv_x, int subdiv_y)
 {
   vertexbuffer vb;
 
@@ -35,7 +35,7 @@ create_plan_xy(double sizex, double sizey, int subdiv_x, int subdiv_y)
 
   vertexbuffer_lock(vb);
   {
-    double x, y, stepx, stepy, stepu, stepv, u, v;
+    float x, y, stepx, stepy, stepu, stepv, u, v;
     int i, j, k, ofs = 0;
     vertex *vertices = vertexbuffer_get_vertices(vb);
     int *indices = vertexbuffer_get_indices(vb);
@@ -43,11 +43,11 @@ create_plan_xy(double sizex, double sizey, int subdiv_x, int subdiv_y)
     x = -1.0*sizex/2;		/* Start at the top-left corner */
     y = 1.0*sizey/2;
 
-    stepx = sizex/(double)subdiv_x;
-    stepy = sizey/(double)subdiv_y;
+    stepx = sizex/(float)subdiv_x;
+    stepy = sizey/(float)subdiv_y;
 
-    stepu = 1.0/(double)subdiv_x;
-    stepv = 1.0/(double)subdiv_y;
+    stepu = 1.0/(float)subdiv_x;
+    stepv = 1.0/(float)subdiv_y;
 
     for(v = 0, j = 0; j < subdiv_y+1; j++) {
       for(u = 0, i = 0; i < subdiv_x+1; i++) {
@@ -81,7 +81,7 @@ create_plan_xy(double sizex, double sizey, int subdiv_x, int subdiv_y)
 }
 
 static object3d *
-create_cube(double size)
+create_cube(float size)
 {
   vertex *vertices;
   int *indices;

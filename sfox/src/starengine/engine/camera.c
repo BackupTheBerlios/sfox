@@ -53,13 +53,12 @@ camera_create(float fov, float zfar, float znear, vector3 *pos, vector3 *up, vie
   vector3_copy(&cam->pos, pos);
   vector3_copy(&cam->up, up);
 
+  quaternion_set(&cam->orientation, 0, 0, 0, 1);
   matrix4_to_zero(cam->projection_matrix);
   matrix4_to_identity(cam->view_matrix);
   cam->need_update = UPDATE_ALL;
 
   camera_set_max_ypr(cam, CAM_UNLIMITED, CAM_UNLIMITED, CAM_UNLIMITED);
-
-  quaternion_set(&cam->orientation, 0, 0, 0, 1);
 
   return cam;
 }
@@ -95,10 +94,8 @@ camera_to_opengl(camera cam)
 void
 camera_set_pos(camera cam, float x, float y, float z)
 {
+  vector3_set(&cam->pos, x, y, z);
   cam->need_update |= UPDATE_VIEW;
-  cam->pos.x = x;
-  cam->pos.y = y;
-  cam->pos.z = z;
 }
 
 void
@@ -179,12 +176,12 @@ camera_mouse_move(camera cam, float xrel, float yrel)
   float pitch = cam->pitch+yrel;
   float yaw = cam->yaw+xrel;
   quaternion q;
-  vector3 tmp;
 
   pitch = DEG360BOUND(pitch);
   yaw = DEG360BOUND(yaw);
 
   if(pitch_not_max(cam, pitch)) {
+    vector3 tmp;
     cam->pitch = pitch;
     quaternion_rotate_vector(&tmp, &cam->orientation, &XAXIS);
     quaternion_from_axis_anglev(&q, &tmp, DEG2RAD(-yrel));
@@ -192,7 +189,7 @@ camera_mouse_move(camera cam, float xrel, float yrel)
   }
 
   if(yaw_not_max(cam, yaw)) {
-    quaternion_from_axis_anglev(&q, &YAXIS, DEG2RAD(-xrel));
+    quaternion_from_axis_anglev(&q, &cam->up, DEG2RAD(-xrel));
     quaternion_mul(&cam->orientation, &q, &cam->orientation);
   }
 
@@ -204,9 +201,9 @@ camera_move_along_view(camera cam, float speed)
 {
   vector3 view;
 
-  vector3_set(&view, -cam->view_matrix[0][2], -cam->view_matrix[1][2], -cam->view_matrix[2][2]);
-  vector3_scale(&view, &view, speed);
-  vector3_add(&cam->pos, &cam->pos, &view);
+  matrix4_get_col(&view, cam->view_matrix, 2);
+  vector3_scale_to(&view, -speed);
+  vector3_add_to(&cam->pos, &view);
 
   cam->need_update |= UPDATE_VIEW;
 }
@@ -216,8 +213,9 @@ camera_side_move(camera cam, float speed)
 {
   vector3 right;
 
-  vector3_set(&right, speed*cam->view_matrix[0][0], speed*cam->view_matrix[1][0], speed*cam->view_matrix[2][0]);
-  vector3_add(&cam->pos, &cam->pos, &right);
+  matrix4_get_col(&right, cam->view_matrix, 0);
+  vector3_scale_to(&right, speed);
+  vector3_add_to(&cam->pos, &right);
 
   cam->need_update |= UPDATE_VIEW;
 }
@@ -258,7 +256,7 @@ update_perspective(camera cam)
   float far = cam->zfar;
   float n2 = 2*near;
 
-  assert(far!=near&&NOTZERO(far)&&NOTZERO(near));
+  assert(NOTZERO(far-near)&&NOTZERO(far)&&NOTZERO(near));
 
   t = tan(fov2)*near;
   b = -t;

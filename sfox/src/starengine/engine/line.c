@@ -2,16 +2,16 @@
 #include "line.h"
 
 void
-line2d_set(line2d *l, double nx, double ny, double d)
+line2d_set(line2d *l, float nx, float ny, float d)
 {
   vector2_set(&l->normal, nx, ny);
   l->d = d;
 }
 
 inline int
-line2d_test_point(line2d *l, double x, double y)
+line2d_test_point(line2d *l, float x, float y)
 {
-  double res = l->normal.x*x+l->normal.y*y+l->d;
+  float res = l->normal.x*x+l->normal.y*y+l->d;
 
   if(res > EPSILON)
     return LFRONT;

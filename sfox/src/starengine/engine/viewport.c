@@ -31,10 +31,10 @@ viewport_destroy(viewport vp)
   free(vp);
 }
 
-double
+float
 viewport_ratio(viewport vp)
 {
-  return (double)vp->width/vp->height;
+  return (float)vp->width/vp->height;
 }
 
 void

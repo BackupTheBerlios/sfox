@@ -1,7 +1,7 @@
 #include "vertex.h"
 
 void
-vertex_set_coord(vertex *v, double x, double y, double z)
+vertex_set_coord(vertex *v, float x, float y, float z)
 {
   v->coord.x = x;
   v->coord.y = y;
@@ -9,7 +9,7 @@ vertex_set_coord(vertex *v, double x, double y, double z)
 }
 
 void
-vertex_set_color(vertex *v, double r, double g, double b, double a)
+vertex_set_color(vertex *v, float r, float g, float b, float a)
 {
   v->col.r = r;
   v->col.g = g;
@@ -18,7 +18,7 @@ vertex_set_color(vertex *v, double r, double g, double b, double a)
 }
 
 void
-vertex_set_tcoord(vertex *vx, int n, double u, double v)
+vertex_set_tcoord(vertex *vx, int n, float u, float v)
 {
   vx->tcoord[n].x = u;
   vx->tcoord[n].y = v;

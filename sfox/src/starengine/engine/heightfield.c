@@ -66,7 +66,7 @@ static void quadtree_render(quadtree_node node, heightfield hf);
 
 heightfield
 heightfield_create_from_file(camera cam, char *heightmap_filename,
-			     double sizex, double sizey, double sizez)
+			     float sizex, float sizey, float sizez)
 {
   heightfield hf;
   assert(heightmap_filename);
@@ -155,7 +155,7 @@ heightfield_set_textures_from_file(heightfield hf, char *land, char *details)
 }
 
 void
-heightfield_set_detail_scale(heightfield hf, double sx, double sy)
+heightfield_set_detail_scale(heightfield hf, float sx, float sy)
 {
   matrix4 scale;
   texture tex = material_get_texture(SF_OBJECT3D(hf)->mat, 0);
@@ -180,7 +180,7 @@ heightfield_get_world_matrix(heightfield hf)
 /* Local functions                                                          */
 /****************************************************************************/
 
-/* Convert 8bit heightmap in double heightmap*/
+/* Convert 8bit heightmap in float heightmap*/
 static float *
 create_zvalues(heightfield hf, char *filename)
 {

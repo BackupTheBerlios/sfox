@@ -112,6 +112,12 @@ quaternion_mul(quaternion *dest, const quaternion *q1, const quaternion *q2)
 }
 
 void
+quaternion_mul_to(quaternion *q1, const quaternion *q2)
+{
+  quaternion_mul(q1, q1, q2);
+}
+
+void
 quaternion_normalize(quaternion *dest, const quaternion *q)
 {
   quaternion_div(dest, q, quaternion_norm(q));

@@ -31,6 +31,6 @@ extern void app_init(int argc, char **argv);
 extern unsigned int framework_get_delta();
 
 /* Frame per sec */
-extern double framework_get_fps();
+extern float framework_get_fps();
 
 #endif

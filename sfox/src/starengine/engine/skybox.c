@@ -14,7 +14,7 @@ enum {FRONT=0, BOTTOM, LEFT, RIGHT, TOP, BACK, LAST};
 struct skybox {
   camera cam;
   object3d *obj[6];
-  double sx;
+  float sx;
 };
 
 static void create_quad(float size);

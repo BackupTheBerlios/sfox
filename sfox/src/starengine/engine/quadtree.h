@@ -11,7 +11,7 @@ typedef struct s_quadtree_node {
 
 /*top left x , top left y, bottom right x, bottom right y, subdivision level*/
 /*Number of leaf:4^level*/
-extern quadtree_node quadtree_create(double tlx, double tly, double brx, double bry, unsigned int level);
+extern quadtree_node quadtree_create(float tlx, float tly, float brx, float bry, unsigned int level);
 /*Do node->data=f(node,data) for each leaf*/
 extern void quadtree_foreach_leaf(quadtree_node node, void *data, void (*f)(quadtree_node , void *));
 #endif

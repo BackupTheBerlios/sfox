@@ -29,7 +29,7 @@ struct heightfieldinfo {
 };
 
 heightfieldinfo
-heightfieldinfo_create(char *landmap, heightfield hf, camera cam, display disp, double sizex, double sizey)
+heightfieldinfo_create(char *landmap, heightfield hf, camera cam, display disp, float sizex, float sizey)
 { 
   matrix4 world;
   heightfieldinfo hfi = malloc(sizeof(struct heightfieldinfo));
@@ -49,7 +49,7 @@ heightfieldinfo_create(char *landmap, heightfield hf, camera cam, display disp, 
 void
 heightfieldinfo_to_opengl(heightfieldinfo hfi)
 {
-  double cellx, celly;
+  float cellx, celly;
   vector3 pos;
   matrix4 inv;
   camera cam = hfi->cam;

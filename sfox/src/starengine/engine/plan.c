@@ -5,7 +5,7 @@
 #include "plan.h"
 
 void
-plane_set(plane *pl, double nx, double ny, double nz, double d)
+plane_set(plane *pl, float nx, float ny, float nz, float d)
 {
   pl->normal.x = nx;
   pl->normal.y = ny;
@@ -14,7 +14,7 @@ plane_set(plane *pl, double nx, double ny, double nz, double d)
 }
 
 void
-plane_setv(plane *pl, vector3 *normal, double d)
+plane_setv(plane *pl, vector3 *normal, float d)
 {
   vector3_copy(&pl->normal, normal);
   pl->d = d;
@@ -30,7 +30,7 @@ plane_copy(plane *dst, plane *src)
 void
 plane_normalize(plane *pl)
 {
-  double norm = vector3_norm(&pl->normal);
+  float norm = vector3_norm(&pl->normal);
   assert(NOTZERO(norm));
   norm = 1.0/norm;
 
@@ -41,9 +41,9 @@ plane_normalize(plane *pl)
 }
 
 int
-plane_test_point(plane *pl, double x, double y, double z)
+plane_test_point(plane *pl, float x, float y, float z)
 {
-  double res = pl->normal.x*x+pl->normal.y*y+pl->normal.z*z+pl->d;
+  float res = pl->normal.x*x+pl->normal.y*y+pl->normal.z*z+pl->d;
 
   if(res > EPSILON)
     return PLFRONT;

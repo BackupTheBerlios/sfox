@@ -26,9 +26,9 @@
 #define CENTERX 400
 #define CENTERY 300
 
-double speed_factor = 1;
+float speed_factor = 1;
 
-double camvel = 5;
+float camvel = 5;
 
 display screen;
 
@@ -156,17 +156,10 @@ handle_keydown(unsigned int key, unsigned int modstat)
 void
 handle_mouse(SDL_MouseMotionEvent *motion)
 {
-  static double rx = 0;
-  static double ry = 0;
-
   if(motion->x == CENTERX && motion->y == CENTERY) 
     return;  
 
-  //camera_mouse_move(camfps, (double)motion->xrel/400.0, (double)motion->yrel/400.0);
-  rx = (double)motion->xrel/10.0;
-  ry = (double)motion->yrel/10.0;
-
-  camera_mouse_move(camfps, rx, ry);
+  camera_mouse_move(camfps, (float)motion->xrel/10, (float)motion->yrel/10);
 }
 
 /*****************************************************************************/
@@ -198,8 +191,6 @@ void init()
   hf = heightfield_create_from_file(camfps, "data/height.png", 1000, 1000, 100);
   heightfield_set_textures_from_file(hf, "data/land.jpg", "data/detail.jpg");
   heightfield_set_detail_scale(hf, 50, 50);
-  //matrix4_to_rot_x(tmp, 90);
-  //heightfield_set_world_matrix(hf, tmp);
 
   /* Heightfield infos*/
   hfi = heightfieldinfo_create("data/land.jpg", hf, camfps, screen, 250, 250);

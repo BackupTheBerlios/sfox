@@ -1,6 +1,8 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+#include <assert.h>
+
 /* m[row][col]*/
 
 typedef float matrix4[4][4];

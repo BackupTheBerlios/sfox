@@ -2,21 +2,21 @@
 
 #include "quadtree.h"
 
-static quadtree_node do_create(double tlx, double tly, double brx, double bry, unsigned int level);
+static quadtree_node do_create(float tlx, float tly, float brx, float bry, unsigned int level);
 
 quadtree_node
-quadtree_create(double tlx, double tly, double brx, double bry, unsigned int level)
+quadtree_create(float tlx, float tly, float brx, float bry, unsigned int level)
 {
   return do_create(tlx, tly, brx, bry, level+1);
 }
 
 /* Really create the quadtree */
 static quadtree_node
-do_create(double tlx, double tly, double brx, double bry, unsigned int level)
+do_create(float tlx, float tly, float brx, float bry, unsigned int level)
 {
   quadtree_node root;
-  double midx = (brx+tlx)/2.0f;
-  double midy = (bry+tly)/2.0f;
+  float midx = (brx+tlx)/2.0f;
+  float midy = (bry+tly)/2.0f;
 
   if(level == 0)
     return NULL;

@@ -2,10 +2,10 @@
 #define COLOR_H
 
 typedef struct color {
-  double r;
-  double g;
-  double b;
-  double a;
+  float r;
+  float g;
+  float b;
+  float a;
 } color;
 
 extern color color_red;

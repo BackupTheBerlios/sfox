@@ -27,6 +27,7 @@ extern void quaternion_from_euler(quaternion *q, float rotx, float roty, float r
 
 extern void quaternion_div(quaternion *dest, const quaternion *q, float k);
 extern void quaternion_mul(quaternion *dest, const quaternion *q1, const quaternion *q2);
+extern void quaternion_mul_to(quaternion *q1, const quaternion *q2);
 
 extern void quaternion_normalize(quaternion *dest, const quaternion *q);
 extern float quaternion_norm(const quaternion *q);

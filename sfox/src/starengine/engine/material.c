@@ -22,12 +22,12 @@ struct material {
   unsigned int num_textures;
   unsigned int active_flag;
   color col;
-  double diffuse;
-  double specular;
+  float diffuse;
+  float specular;
 };
 
 material
-material_create(texture tex[], int num_textures, color *col, double diffuse, double specular)
+material_create(texture tex[], int num_textures, color *col, float diffuse, float specular)
 {
   material mat = malloc(sizeof(struct material));
   assert(mat);
@@ -81,7 +81,7 @@ material_to_opengl(material mat)
   if(mat->active_flag&COLOR) {
     glDisable(GL_TEXTURE_2D);
     glDisableClientState(GL_COLOR_ARRAY);
-    glColor4d(mat->col.r, mat->col.g, mat->col.b, mat->col.a);
+    glColor4f(mat->col.r, mat->col.g, mat->col.b, mat->col.a);
   }
 
   if(mat->active_flag&TEXTURE)

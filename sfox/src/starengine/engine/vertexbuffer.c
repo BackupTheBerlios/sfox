@@ -213,15 +213,15 @@ set_vertex_array_pointers(vertexbuffer vb)
 {
   unsigned int i;
 
-  glColorPointer(4, GL_DOUBLE, sizeof(struct vertex), ADDPOINTER(vb->vertices, VERTEXOFFSETCOLOR));
+  glColorPointer(4, GL_FLOAT, sizeof(struct vertex), ADDPOINTER(vb->vertices, VERTEXOFFSETCOLOR));
 
   glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_DOUBLE, sizeof(struct vertex), vb->vertices);
+  glVertexPointer(3, GL_FLOAT, sizeof(struct vertex), vb->vertices);
 
   for(i = 0; i < MAX_TEXTURES; i++) {
     glActiveTexture(GL_TEXTURE0+i);
     glClientActiveTexture(GL_TEXTURE0+i);
-    glTexCoordPointer(2, GL_DOUBLE, sizeof(struct vertex), ADDPOINTER(vb->vertices, VERTEXOFFSETTCOORD(i)));
+    glTexCoordPointer(2, GL_FLOAT, sizeof(struct vertex), ADDPOINTER(vb->vertices, VERTEXOFFSETTCOORD(i)));
   }
 }
 

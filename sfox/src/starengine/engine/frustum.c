@@ -72,7 +72,7 @@ frustum_get_from_opengl(frustum *ftm)
 }
 
 int
-frustum_point_is_into(frustum *ftm, double x, double y, double z)
+frustum_point_is_into(frustum *ftm, float x, float y, float z)
 {
   if(plane_test_point(&ftm->right, x, y, z)==PLBACK)
     return 0;
@@ -150,7 +150,7 @@ frustum_to_frustum2d_xz(frustum2d *ftm2d, frustum *ftm)
 }
 
 int
-frustum2d_point_is_into(frustum2d *ftm, double x, double y)
+frustum2d_point_is_into(frustum2d *ftm, float x, float y)
 {
   if(line2d_test_point(&ftm->right, x, y)==LBACK)
     return 0;

@@ -24,7 +24,7 @@ static resize_func handle_resize = default_resize_handler;
 
 static int framework_running = 1;
 static unsigned int delta_time = 0;
-static double fps = 0;
+static float fps = 0;
 
 /* Internal functions */
 static void quit_sdl();
@@ -107,7 +107,7 @@ framework_get_delta()
     return delta_time;
 }
 
-double
+float
 framework_get_fps()
 {
     return fps;
@@ -160,7 +160,7 @@ calc_fps()
     frame++;	
     elapsed_time += delta_time;
     if(frame >= FPS_CALC_INTERVAL) {
-	fps = 1000*frame/(double)elapsed_time;
+	fps = 1000*frame/(float)elapsed_time;
 	frame = 0;
 	elapsed_time = 0;
     }
