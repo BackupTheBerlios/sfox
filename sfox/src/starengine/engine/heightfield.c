@@ -4,6 +4,8 @@
 /*far and near must be calculated correctly in frustum_transform_and_copy*/
 /*BUG: when the camera is at y=0 everything is ok*/
 /*y!=0 culling culls too much*/
+/*create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod)*/
+/*TODO: pass directly x,y to create_mesh_patch_stripped_lod */
 #ifdef _WIN32
 # include <windows.h>
 # include <GL/gl.h>
@@ -27,6 +29,9 @@
 #include "utility.h"
 #include "quadtree.h"
 #include "camera.h"
+
+#define INTERNAL_SIZE 1.0f
+#define INTERNAL_CENTER INTERNAL_SIZE/2.0f
 
 /* Texure0 is the detailmap and texture1 is the landmap */
 struct heightfield {
@@ -52,8 +57,9 @@ struct heightfield {
 static double *create_zvalues(heightfield hf, char *filename);
 static object3d create_mesh_stripped_lod(heightfield hf, double sizex, 
 					 double sizey, double sizez, int lod);
-static object3d create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod);
-static object3d create_mesh_patch_stripped_lod2(heightfield hf, double px, double py, int lod);
+//static object3d create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod);
+static object3d create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int py, int lod);
+static object3d create_mesh_patch_stripped_lod2(heightfield hf, double x, double y, int lod);
 
 static void quadtree_fill(quadtree_node node, void  *hf);
 static void quadtree_set_material(quadtree_node node, void *mat);
@@ -77,13 +83,13 @@ heightfield_create_from_file(camera cam, char *heightmap_filename,
 
   hf = (heightfield)malloc(sizeof(struct heightfield));
 
-  hf->sizex = sizex;
-  hf->sizey = sizey;
-  hf->sizez = sizez;
+  hf->sizex = sizex/INTERNAL_SIZE;
+  hf->sizey = sizey/INTERNAL_SIZE;
+  hf->sizez = sizez/INTERNAL_SIZE;
   hf->patch_sizex = 17;
   hf->cam = cam;
 
-  matrix4_to_scale(hf->local, sizex, sizey, sizez);
+  matrix4_to_scale(hf->local, hf->sizex, hf->sizey, hf->sizez);
   matrix4_copy(hf->world, matrix4_identity);
 
   hf->zvalues = create_zvalues(hf, heightmap_filename);
@@ -93,7 +99,7 @@ heightfield_create_from_file(camera cam, char *heightmap_filename,
     return NULL;
   }
 
-  hf->quadtree = quadtree_create(-0.5f, 0.5, 0.5, -0.5, 5);
+  hf->quadtree = quadtree_create(-INTERNAL_CENTER, INTERNAL_CENTER, INTERNAL_CENTER, -INTERNAL_CENTER, 4);
   quadtree_foreach_leaf(hf->quadtree, hf, quadtree_fill);
 
   return hf;  
@@ -120,6 +126,25 @@ heightfield_to_opengl(heightfield hf)
 
   quadtree_render(hf->quadtree, hf);
   //  quadtree_foreach_leaf(hf->quadtree, hf, quadtree_to_opengl);
+}
+
+static void
+quadtree_render(quadtree_node node, heightfield hf)
+{
+  if(node->childs[0] == NULL || node->childs[1] == NULL ||
+     node->childs[2] == NULL || node->childs[3] == NULL) {
+    object3d_to_opengl((object3d)node->data);
+    return;
+  }
+
+  //if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[0]->box))
+     quadtree_render(node->childs[0], hf);
+     //if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[1]->box)) 
+     quadtree_render(node->childs[1], hf);
+     //if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[2]->box))
+     quadtree_render(node->childs[2], hf);
+     //if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[3]->box))
+     quadtree_render(node->childs[3], hf);
 }
 
 /************************************************************************/
@@ -242,7 +267,7 @@ create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double size
     double *z = hf->zvalues;
     unsigned int i, j, k = 0, ofs = 0;
     unsigned int next_line = step*w;
-    double u=0, v=0, x, y = 0.5;
+    double u=0, v=0, x, y = INTERNAL_CENTER;
     double stepu = (double)step/w;
     double stepv = -(double)step/h;
     double stepx = (double)step/w;
@@ -250,7 +275,7 @@ create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double size
 
     for(j = 0; j < h-1; j+=step) {
       unsigned int old_k = k+1;	/* Second vertex of the row */
-      for(i = 0, u = 0, x = -0.5; i < w; i+=step, ofs+=step) {
+      for(i = 0, u = 0, x = -INTERNAL_CENTER; i < w; i+=step, ofs+=step) {
 	vertex_set_coord(&vertices[k], x, y, z[ofs]);
 	vertex_set_coord(&vertices[k+1], x, y-stepy, z[ofs+next_line]);
 	vertex_set_tcoord(&vertices[k], 0, u, v);
@@ -276,9 +301,72 @@ create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double size
   return object3d_create(local, matrix4_identity, vb, NULL);
 }
 
-/*This function creates the patch (px,py) with lod lod*/
+/* #ifdef 0 */
+/* /\*This function creates the patch (px,py) with lod lod*\/ */
+/* static object3d */
+/* create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod) */
+/* { */
+/*   matrix4 local; */
+/*   vertexbuffer vb; */
+/*   unsigned int w, h, step; */
+/*   unsigned int num_vert; */
+
+/*   px *= hf->patch_sizex-1; */
+/*   py *= hf->patch_sizex-1; */
+
+/*   w = hf->w; */
+/*   h = hf->h; */
+/*   step = (1<<lod); */
+
+/*   /\* num_vert is 2*(ceil(patch_sizex/step)+1)*(ceil(patch_sizex/step)-1) *\/ */
+/*   num_vert = (hf->patch_sizex-1)/step; */
+/*   num_vert *= 2*(num_vert+2); */
+/*   vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_STRIP, num_vert, 0); */
+
+/*   vertexbuffer_lock(vb); */
+/*   { */
+/*     vertex *vertices = vertexbuffer_get_vertices(vb); */
+/*     double *z = hf->zvalues; */
+/*     unsigned int i, j, k = 0, ofs = px+py*w; */
+/*     unsigned int next_line = step*w; */
+/*     double stepu = (double)step/w; */
+/*     double stepv = -(double)step/h; */
+/*     double stepx = (double)step/w; */
+/*     double stepy = (double)step/h; */
+/*     double u, v = -py*stepv, x, y = INTERNAL_CENTER-py*stepy; */
+
+/*     //printf("x y=%f %f\n", -INTERNAL_CENTER+px*stepx, y); */
+/*     for(j = 0; j < hf->patch_sizex-1; j+=step) { */
+/*       unsigned int old_k = k+1;	/\* Second vertex of the row *\/ */
+/*       for(i = 0, u = px*stepu, x = -INTERNAL_CENTER+px*stepx; i < hf->patch_sizex; i+=step, ofs+=step) { */
+/* 	vertex_set_coord(&vertices[k], x, y, z[ofs]); */
+/* 	vertex_set_coord(&vertices[k+1], x, y-stepy, z[ofs+next_line]); */
+/* 	vertex_set_tcoord(&vertices[k], 0, u, v); */
+/* 	vertex_set_tcoord(&vertices[k], 1, u, v); */
+/* 	vertex_set_tcoord(&vertices[k+1], 0, u, v-stepv); */
+/* 	vertex_set_tcoord(&vertices[k+1], 1, u, v-stepv); */
+/* 	k+=2; */
+/* 	x += stepx; */
+/* 	u += stepu; */
+/*       } */
+/*       ofs += next_line-hf->patch_sizex-(step-1); */
+/*       vertex_copy(&vertices[k], &vertices[k-1]); */
+/*       vertex_copy(&vertices[k+1], &vertices[old_k]); */
+/*       k+=2; */
+/*       v -= stepv; */
+/*       y -= stepy; */
+/*     } */
+/*   } */
+/*   vertexbuffer_unlock(vb); */
+
+/*   matrix4_to_scale(local, hf->sizex, hf->sizey, hf->sizez); */
+
+/*   return object3d_create(local, matrix4_identity, vb, NULL); */
+/* } */
+/* #endif */
+
 static object3d
-create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod)
+create_mesh_patch_stripped_lod(heightfield hf, double x, double y, int px, int py, int lod)
 {
   matrix4 local;
   vertexbuffer vb;
@@ -292,7 +380,9 @@ create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod)
   h = hf->h;
   step = (1<<lod);
 
-  num_vert = (unsigned int)((2*ceil((double)hf->patch_sizex/step)+2)*(ceil((double)hf->patch_sizex/step)-1));
+  /* num_vert is 2*(ceil(patch_sizex/step)+1)*(ceil(patch_sizex/step)-1) */
+  num_vert = (hf->patch_sizex-1)/step;
+  num_vert *= 2*(num_vert+2);
   vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_STRIP, num_vert, 0);
 
   vertexbuffer_lock(vb);
@@ -305,11 +395,13 @@ create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod)
     double stepv = -(double)step/h;
     double stepx = (double)step/w;
     double stepy = (double)step/h;
-    double u, v = -py*stepv, x, y = 0.5-py*stepy;
+    double u, v = -py*stepv;
+    double oldx = x;
 
+    //printf("x y=%f %f\n", -INTERNAL_CENTER+px*stepx, y);
     for(j = 0; j < hf->patch_sizex-1; j+=step) {
       unsigned int old_k = k+1;	/* Second vertex of the row */
-      for(i = 0, u = px*stepu, x = -0.5+px*stepx; i < hf->patch_sizex; i+=step, ofs+=step) {
+      for(i = 0, u = px*stepu, x = oldx; i < hf->patch_sizex; i+=step, ofs+=step) {
 	vertex_set_coord(&vertices[k], x, y, z[ofs]);
 	vertex_set_coord(&vertices[k+1], x, y-stepy, z[ofs+next_line]);
 	vertex_set_tcoord(&vertices[k], 0, u, v);
@@ -336,15 +428,20 @@ create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod)
 }
 
 /*Transform (px,py) in patch unit coordinate and draw the corresponding patch*/
+/*px=(x+S/2)*N/S */
+/*where: N=number of patch on a row*/
+/*       S=size of the bbox*/
 static object3d
-create_mesh_patch_stripped_lod2(heightfield hf, double px, double py, int lod)
+create_mesh_patch_stripped_lod2(heightfield hf, double x, double y, int lod)
 {
-  int cellx = (int)((px+0.5)*256.0f/16);
-  int celly = (int)((-py+0.5)*256.0f/16);
+  int num_patch_x = (hf->w - 1)/(hf->patch_sizex - 1);
+  int num_patch_y = (hf->h - 1)/(hf->patch_sizex - 1);
+  int cellx = (int)((x+INTERNAL_CENTER)*num_patch_x/INTERNAL_SIZE);
+  int celly = (int)((-y+INTERNAL_CENTER)*num_patch_y/INTERNAL_SIZE);
 
-  //    printf("%d %d %f %f\n", cellx, celly, px, py);
+  printf("%d %d %f %f\n", cellx, celly, x, y);
   
-  return create_mesh_patch_stripped_lod(hf, cellx, celly, lod);
+  return create_mesh_patch_stripped_lod(hf, x, y, cellx, celly, lod);
 }
 
 static void
@@ -375,25 +472,6 @@ static void
 quadtree_to_opengl(quadtree_node node, void *data)
 {
   object3d_to_opengl((object3d)node->data);
-}
-
-static void
-quadtree_render(quadtree_node node, heightfield hf)
-{
-  if(node->childs[0] == NULL || node->childs[1] == NULL ||
-     node->childs[2] == NULL || node->childs[3] == NULL) {
-    object3d_to_opengl((object3d)node->data);
-    return;
-  }
-
-  if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[0]->box))
-     quadtree_render(node->childs[0], hf);
-  if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[1]->box)) 
-     quadtree_render(node->childs[1], hf);
-  if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[2]->box))
-     quadtree_render(node->childs[2], hf);
-  if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[3]->box))
-     quadtree_render(node->childs[3], hf);
 }
 
 /***********************************************************************/
