@@ -1,3 +1,10 @@
+2004-01-13  ben  <le.coyote@tiscali.fr>
+
+	* src/starengine/engine/heightfield.c
+	(create_mesh_patch_stripped_lod): Create the patch (px,py). Still
+	a lot of hardcoded values.
+	The heightfield is now rendered with tiles.
+
 2004-01-11  ben  <le.coyote@tiscali.fr>
 
 	* general: Win32 compilation is ok

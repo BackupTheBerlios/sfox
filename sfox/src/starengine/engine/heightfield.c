@@ -22,9 +22,12 @@
 
 /* Texure0 is the detailmap and texture1 is the landmap */
 struct heightfield {
-  object3d obj;
+  object3d obj[16*16];
   unsigned int w, h;
   double *zvalues;	/* width*height array containing z*sizez values */
+
+  double sizex, sizey, sizez;
+  unsigned int patch_sizex;
 };
 
 
@@ -35,6 +38,7 @@ struct heightfield {
 static double *create_zvalues(heightfield hf, char *filename);
 static object3d create_mesh_stripped_lod(heightfield hf, double sizex, 
 					 double sizey, double sizez, int lod);
+static object3d create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod);
 
 /**********************************************************************/
 /* And now for something completely different                         */
@@ -44,11 +48,17 @@ heightfield
 heightfield_create_from_file(char *heightmap_filename, double sizex,
 			     double sizey, double sizez)
 {
+  unsigned int i, j;
   heightfield hf;
   assert(heightmap_filename);
 
-
   hf = (heightfield)malloc(sizeof(struct heightfield));
+
+  hf->sizex = sizex;
+  hf->sizey = sizey;
+  hf->sizez = sizez;
+  hf->patch_sizex = 17;
+
   hf->zvalues = create_zvalues(hf, heightmap_filename);
   if(!hf->zvalues) {
     free(hf);
@@ -56,13 +66,17 @@ heightfield_create_from_file(char *heightmap_filename, double sizex,
     return NULL;
   }
 
-  hf->obj = create_mesh_stripped_lod(hf, sizex, sizey, sizez, 0);
-  if(!hf->obj) {
-    free(hf->zvalues);
-    free(hf);
-    fprintf(stderr, "heightfield_create_from_file: Can't create mesh\n");
-    return NULL;
-  }
+  //  hf->obj = create_mesh_stripped_lod(hf, sizex, sizey, sizez, 0);
+  for(j = 0; j < 16; j++)
+    for(i = 0; i < 16; i++) {
+      hf->obj[i+j*16] = create_mesh_patch_stripped_lod(hf, i, j, 0);
+      if(!hf->obj[i]) {
+	free(hf->zvalues);
+	free(hf);
+	fprintf(stderr, "heightfield_create_from_file: Can't create mesh\n");
+	return NULL;
+      }
+    }
 
   return hf;  
 }
@@ -70,7 +84,10 @@ heightfield_create_from_file(char *heightmap_filename, double sizex,
 void
 heightfield_to_opengl(heightfield hf)
 {
-  object3d_to_opengl(hf->obj);
+  unsigned int i;
+
+  for(i = 0; i < 16*16; i++)
+    object3d_to_opengl(hf->obj[i]);
 }
 
 /************************************************************************/
@@ -79,6 +96,7 @@ heightfield_to_opengl(heightfield hf)
 void
 heightfield_set_textures_from_file(heightfield hf, char *land, char *details)
 {
+  unsigned int i;
   texture tex[2];
   material mat;
   assert(land&&details);
@@ -96,13 +114,14 @@ heightfield_set_textures_from_file(heightfield hf, char *land, char *details)
   texture_set_mag_filter_mode(tex[1], LINEAR);
 
   mat = material_create(tex, 2, NULL, 0, 0);
-  object3d_set_material(hf->obj, mat);
+  for(i=0; i<16; i++)
+    object3d_set_material(hf->obj[i], mat);
 }
 
 void
 heightfield_set_detail_scale(heightfield hf, double sx, double sy)
 {
-  texture tex = material_get_texture(object3d_get_material(hf->obj), 0);
+  texture tex = material_get_texture(object3d_get_material(hf->obj[0]), 0);
   matrix4 scale;
 
   matrix4_to_scale(scale, sx, sy, 1);
@@ -112,31 +131,35 @@ heightfield_set_detail_scale(heightfield hf, double sx, double sy)
 object3d
 heightfield_get_object(heightfield hf)
 {
-  return hf->obj;
+  return hf->obj[0];
 }
 
 void
 heightfield_set_local_matrix(heightfield hf, matrix4 local)
 {
-  object3d_set_local_matrix(hf->obj, local);
+  unsigned int i;
+  for(i = 0; i < 16*16; i++)
+    object3d_set_local_matrix(hf->obj[i], local);
 }
 
 void
 heightfield_set_world_matrix(heightfield hf, matrix4 world)
 {
-  object3d_set_world_matrix(hf->obj, world);
+  unsigned int i;
+  for(i = 0; i < 16*16; i++)
+    object3d_set_world_matrix(hf->obj[i], world);
 }
 
 matrix4 *
 heightfield_get_world_matrix(heightfield hf)
 {
-  return object3d_get_world_matrix(hf->obj);
+  return object3d_get_world_matrix(hf->obj[0]);
 }
 
 matrix4 *
 heightfield_get_local_matrix(heightfield hf)
 {
-  return object3d_get_local_matrix(hf->obj);
+  return object3d_get_local_matrix(hf->obj[0]);
 }
 
 /****************************************************************************/
@@ -228,6 +251,65 @@ create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double size
   vertexbuffer_unlock(vb);
 
   matrix4_to_scale(local, sizex, sizey, sizez);
+
+  return object3d_create(local, matrix4_identity, vb, NULL);
+}
+
+/*This function creates the patch (px,py) with lod lod*/
+static object3d
+create_mesh_patch_stripped_lod(heightfield hf, int px, int py, int lod)
+{
+  matrix4 local;
+  vertexbuffer vb;
+  unsigned int w, h, step;
+  unsigned int num_vert;
+
+  px *= hf->patch_sizex-1;
+  py *= hf->patch_sizex-1;
+
+  w = hf->w;
+  h = hf->h;
+  step = (1<<lod);
+
+  num_vert = (unsigned int)((2*ceil((double)hf->patch_sizex/step)+2)*(ceil((double)hf->patch_sizex/step)-1));
+  vb = vertexbuffer_create(VB_SYSTEM, TRIANGLES_STRIP, num_vert, 0);
+
+  vertexbuffer_lock(vb);
+  {
+    vertex *vertices = vertexbuffer_get_vertices(vb);
+    double *z = hf->zvalues;
+    unsigned int i, j, k = 0, ofs = px+py*w;
+    unsigned int next_line = step*w;
+    double stepu = (double)step/w;
+    double stepv = -(double)step/h;
+    double stepx = (double)step/w;
+    double stepy = (double)step/h;
+    double u, v = -py*stepv, x, y = 0.5-py*stepy;
+
+    for(j = 0; j < hf->patch_sizex-1; j+=step) {
+      unsigned int old_k = k+1;	/* Second vertex of the row */
+      for(i = 0, u = px*stepu, x = -0.5+px*stepx; i < hf->patch_sizex; i+=step, ofs+=step) {
+	vertex_set_coord(&vertices[k], x, y, z[ofs]);
+	vertex_set_coord(&vertices[k+1], x, y-stepy, z[ofs+next_line]);
+	vertex_set_tcoord(&vertices[k], 0, u, v);
+	vertex_set_tcoord(&vertices[k], 1, u, v);
+	vertex_set_tcoord(&vertices[k+1], 0, u, v-stepv);
+	vertex_set_tcoord(&vertices[k+1], 1, u, v-stepv);
+	k+=2;
+	x += stepx;
+	u += stepu;
+      }
+      ofs += next_line-hf->patch_sizex-(step-1);
+      vertex_copy(&vertices[k], &vertices[k-1]);
+      vertex_copy(&vertices[k+1], &vertices[old_k]);
+      k+=2;
+      v -= stepv;
+      y -= stepy;
+    }
+  }
+  vertexbuffer_unlock(vb);
+
+  matrix4_to_scale(local, hf->sizex, hf->sizey, hf->sizez);
 
   return object3d_create(local, matrix4_identity, vb, NULL);
 }
