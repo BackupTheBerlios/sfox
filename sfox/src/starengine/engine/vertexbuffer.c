@@ -51,15 +51,12 @@ static void free_vbo(vertexbuffer vb);
 vertexbuffer
 vertexbuffer_create(vertexbuffer_type vbtype, vertices_type vtype, int num_vertices, int num_indices)
 {
-  vertexbuffer vb = malloc(sizeof(struct vertexbuffer));
+  vertexbuffer vb = calloc(1, sizeof(struct vertexbuffer));
 
   vb->num_indices = num_indices;
   vb->num_vertices = num_vertices;
   vb->vbtype = vbtype;
   vb->vtype = vtype;
-  vb->lock = 0;
-  vb->vertices = NULL;
-  vb->indices = NULL;
 
   switch(vbtype) {
       case VB_SYSTEM:
@@ -68,7 +65,7 @@ vertexbuffer_create(vertexbuffer_type vbtype, vertices_type vtype, int num_verti
 	break;
       case VB_STATIC_DRAW:
       case VB_DYNAMIC_DRAW:
-	return create_vbo(vb);
+	vb = create_vbo(vb);
 	break;
       default:
 	fprintf(stderr, "!!Vertex Buffer Type unsupported\n");
@@ -100,15 +97,15 @@ vertexbuffer_lock(vertexbuffer vb)
   assert(vb->lock==0);
   vb->lock = 1;
 
+  vertexbuffer_bind(vb);
+
   if(vb->vbtype == VB_SYSTEM)
     return;
 
   switch(vb->vtype) {
       case TRIANGLES_INDEXED:
-	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, vb->buffer_index_id);
 	vb->indices = glMapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_READ_WRITE_ARB);
       case TRIANGLES_STRIP:
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, vb->buffer_vertex_id);
 	vb->vertices = glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_READ_WRITE_ARB);
 	break;
       default:
@@ -122,18 +119,16 @@ vertexbuffer_unlock(vertexbuffer vb)
   assert(vb->lock!=0);
   vb->lock=0;
 
+  vertexbuffer_bind(vb);
+
   if(vb->vbtype == VB_SYSTEM)
     return;
 
   switch(vb->vtype) {
       case TRIANGLES_INDEXED:
-	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, vb->buffer_index_id);
 	glUnmapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB);
       case TRIANGLES_STRIP:
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, vb->buffer_vertex_id);
 	glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 	break;
       default:
 	break;
@@ -172,11 +167,11 @@ vertexbuffer_to_opengl(vertexbuffer vb)
   int i;
   int gltype, num_elem_to_draw;
 
+  vertexbuffer_bind(vb);
+
   if(vb->vbtype != VB_SYSTEM ) {
     vbo_to_opengl(vb);
   } else {
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 
     glColorPointer(4, GL_DOUBLE, sizeof(struct vertex), &(vb->vertices->col));
 
@@ -217,6 +212,13 @@ vertexbuffer_to_opengl(vertexbuffer vb)
   glDisableClientState(GL_EDGE_FLAG_ARRAY);
 }
 
+void
+vertexbuffer_bind(vertexbuffer vb)
+{
+  glBindBufferARB(GL_ARRAY_BUFFER_ARB, vb->buffer_vertex_id);
+  glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, vb->buffer_index_id);
+}
+
 /****************************************************************************/
 /* Local functions                                                          */
 /****************************************************************************/
@@ -224,6 +226,7 @@ vertexbuffer_to_opengl(vertexbuffer vb)
 static vertexbuffer
 create_vbo(vertexbuffer vb)
 {
+  int i;
   /* Allocate an index buffer and a vertex buffer for TRIANGLES_INDEXED */
   switch(vb->vtype) {
       case TRIANGLES_INDEXED:
@@ -252,6 +255,11 @@ static void
 free_vbo(vertexbuffer vb)
 {
   assert(!vb->lock);
+
+  /* We don't want to free usued vbo */
+  glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+  glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+
   switch(vb->vtype) {
       case TRIANGLES_INDEXED:
 	glDeleteBuffersARB(1, &vb->buffer_index_id);
@@ -268,10 +276,8 @@ vbo_to_opengl(vertexbuffer vb)
 
   switch(vb->vtype) {	
       case TRIANGLES_INDEXED:
-	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, vb->buffer_index_id);
 	glEnableClientState(GL_INDEX_ARRAY);
       case TRIANGLES_STRIP:
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, vb->buffer_vertex_id);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_DOUBLE, sizeof(struct vertex), OFFSET(0));
 	for(i = 0; i < MAX_TEXTURES; i++) {

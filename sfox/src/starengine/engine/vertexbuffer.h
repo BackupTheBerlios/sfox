@@ -1,3 +1,6 @@
+/**
+   A vertexbuffer contains an array of vertex.
+*/
 #ifndef VERTEXBUFFER_H
 #define VERTEXBUFFER_H
 
@@ -24,6 +27,8 @@ extern unsigned int vertexbuffer_get_num_indices(vertexbuffer vb);
 extern unsigned int vertexbuffer_get_num_vertices(vertexbuffer vb);
 
 extern void vertexbuffer_to_opengl(vertexbuffer vb);
+
+extern void vertexbuffer_bind(vertexbuffer vb);
 
 
 #endif
