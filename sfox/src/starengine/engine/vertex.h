@@ -11,6 +11,10 @@ typedef struct vertex {
   color col;
 } vertex;
 
+#define VERTEXOFFSETCOORD 0
+#define VERTEXOFFSETTCOORD(i) (sizeof(vector3)+sizeof(vector2)*(i))
+#define VERTEXOFFSETCOLOR (sizeof(vector3)+sizeof(vector2)*(MAX_TEXTURES))
+
 extern void vertex_set_coord(vertex *v, double x, double y, double z);
 extern void vertex_set_color(vertex *v, double r, double g, double b, double a);
 /* Set texture coordinates for texture n*/

@@ -29,6 +29,9 @@ struct vertexbuffer {
 #define OFFSET(x) ((char *)NULL + (x))
 #define POINTER(x) ((char *)(x) - (char *)NULL)
 
+/*Add offset i to pointer p*/
+#define ADDPOINTER(p, i) (OFFSET(((unsigned int)(p))+(i)))
+
 /**********************************************************************/
 /* Engine to OpenGL constant conversion                               */
 /**********************************************************************/
@@ -41,8 +44,8 @@ static const GLuint v_type[] = { GL_TRIANGLES, GL_TRIANGLE_STRIP };
 /**********************************************************************/
 
 static vertexbuffer create_vbo(vertexbuffer vb);
-static void vbo_to_opengl(vertexbuffer vb);
 static void free_vbo(vertexbuffer vb);
+inline static void set_vertex_array_pointers(vertexbuffer vb);
 
 /**********************************************************************/
 /* And now for something completely different                         */
@@ -51,6 +54,7 @@ static void free_vbo(vertexbuffer vb);
 vertexbuffer
 vertexbuffer_create(vertexbuffer_type vbtype, vertices_type vtype, int num_vertices, int num_indices)
 {
+  /*indices and vertices *must* be set to 0*/
   vertexbuffer vb = calloc(1, sizeof(struct vertexbuffer));
 
   vb->num_indices = num_indices;
@@ -111,8 +115,10 @@ vertexbuffer_lock(vertexbuffer vb)
       default:
 	break;
   }
+
 }
 
+/*indices and vertices must be set to 0*/
 void
 vertexbuffer_unlock(vertexbuffer vb)
 {
@@ -129,6 +135,8 @@ vertexbuffer_unlock(vertexbuffer vb)
 	glUnmapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB);
       case TRIANGLES_STRIP:
 	glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
+	vb->vertices = NULL;
+	vb->indices = NULL;
 	break;
       default:
 	break;
@@ -164,47 +172,17 @@ vertexbuffer_get_num_vertices(vertexbuffer vb)
 void
 vertexbuffer_to_opengl(vertexbuffer vb)
 {
-  int i;
-  int gltype, num_elem_to_draw;
-
   vertexbuffer_bind(vb);
+  set_vertex_array_pointers(vb);
 
-  if(vb->vbtype != VB_SYSTEM ) {
-    vbo_to_opengl(vb);
-  } else {
-
-    glColorPointer(4, GL_DOUBLE, sizeof(struct vertex), &(vb->vertices->col));
-
-    for(i = 0; i < MAX_TEXTURES; i++) {
-      glActiveTexture(GL_TEXTURE0+i);
-      glClientActiveTexture(GL_TEXTURE0+i);
-      glTexCoordPointer(2, GL_DOUBLE, sizeof(struct vertex), &(vb->vertices->tcoord[0]));
-    }
-
-    if(vb->vtype == TRIANGLES_INDEXED) {
-      gltype = GL_TRIANGLES;
-      num_elem_to_draw = vb->num_indices;
-    } else
-      glDisableClientState(GL_INDEX_ARRAY);
-
-    if(vb->vtype == TRIANGLES_STRIP) {
-      gltype = GL_TRIANGLE_STRIP;
-      num_elem_to_draw = vb->num_vertices;
-    }
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_DOUBLE, sizeof(struct vertex), &vb->vertices->coord);
-
-    if(vb->vtype == TRIANGLES_INDEXED) {
-      assert(vb->indices);
-      glDrawElements(gltype, num_elem_to_draw, GL_UNSIGNED_INT, vb->indices);
-    } else
-      glDrawArrays(gltype, 0, num_elem_to_draw);
-  }
+  if(vb->vtype == TRIANGLES_INDEXED) {
+    glEnableClientState(GL_INDEX_ARRAY);
+    glDrawElements(v_type[vb->vtype], vb->num_indices, GL_UNSIGNED_INT, vb->indices);
+  } else
+    glDrawArrays(v_type[vb->vtype], 0, vb->num_vertices);
 
   glActiveTexture(GL_TEXTURE0);
   glClientActiveTexture(GL_TEXTURE0);
-
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
@@ -223,10 +201,26 @@ vertexbuffer_bind(vertexbuffer vb)
 /* Local functions                                                          */
 /****************************************************************************/
 
+inline static void
+set_vertex_array_pointers(vertexbuffer vb)
+{
+  unsigned int i;
+
+  glColorPointer(4, GL_DOUBLE, sizeof(struct vertex), ADDPOINTER(vb->vertices, VERTEXOFFSETCOLOR));
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glVertexPointer(3, GL_DOUBLE, sizeof(struct vertex), vb->vertices);
+
+  for(i = 0; i < MAX_TEXTURES; i++) {
+    glActiveTexture(GL_TEXTURE0+i);
+    glClientActiveTexture(GL_TEXTURE0+i);
+    glTexCoordPointer(2, GL_DOUBLE, sizeof(struct vertex), ADDPOINTER(vb->vertices, VERTEXOFFSETTCOORD(i)));
+  }
+}
+
 static vertexbuffer
 create_vbo(vertexbuffer vb)
 {
-  int i;
   /* Allocate an index buffer and a vertex buffer for TRIANGLES_INDEXED */
   switch(vb->vtype) {
       case TRIANGLES_INDEXED:
@@ -264,29 +258,4 @@ free_vbo(vertexbuffer vb)
 	glDeleteBuffersARB(1, &vb->buffer_vertex_id);
 	break;
   }
-}
-
-static void
-vbo_to_opengl(vertexbuffer vb)
-{
-  int i;
-
-  switch(vb->vtype) {	
-      case TRIANGLES_INDEXED:
-	glEnableClientState(GL_INDEX_ARRAY);
-      case TRIANGLES_STRIP:
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_DOUBLE, sizeof(struct vertex), OFFSET(0));
-	for(i = 0; i < MAX_TEXTURES; i++) {
-	  glActiveTexture(GL_TEXTURE0+i);
-	  glClientActiveTexture(GL_TEXTURE0+i);
-	  glTexCoordPointer(2, GL_DOUBLE, sizeof(struct vertex), OFFSET(sizeof(vector3)+i*sizeof(vector2)));
-	}
-	break;
-  }
-	
-  if(vb->vtype == TRIANGLES_INDEXED)
-    glDrawElements(v_type[vb->vtype], vb->num_indices, GL_UNSIGNED_INT, OFFSET(0));
-  else
-    glDrawArrays(v_type[vb->vtype], 0, vb->num_vertices);
 }
