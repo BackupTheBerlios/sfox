@@ -1,2 +1,2 @@
-*/* 2004-01-01 19:48 gandalf: Try to make a glib-like object oriented model
-*/* 2004-01-01 19:45 gandalf: Write the frustum function creation in camera.c
+-Try to make a glib-like object oriented model
+-Write the frustum function creation in camera.c
