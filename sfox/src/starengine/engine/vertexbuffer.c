@@ -23,6 +23,7 @@ struct vertexbuffer {
   vertices_type vtype;
   int lock;
 
+  /* VBO's ids */
   unsigned int buffer_vertex_id;
   unsigned int buffer_index_id;
 };
@@ -186,7 +187,7 @@ vertexbuffer_to_opengl(vertexbuffer vb)
     glDrawElements(v_type[vb->vtype], vb->num_indices, GL_UNSIGNED_INT, vb->indices);
   } else
     glDrawArrays(v_type[vb->vtype], 0, vb->num_vertices);
-
+  
   glActiveTexture(GL_TEXTURE0);
   glClientActiveTexture(GL_TEXTURE0);
   glDisableClientState(GL_VERTEX_ARRAY);
