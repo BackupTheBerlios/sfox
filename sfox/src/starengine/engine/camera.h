@@ -33,4 +33,8 @@ extern void camera_set_max_theta(camera cam, double angle);
 
 extern void camera_update_frustum(camera cam);
 
+
+extern void camera_mouse_move2(camera gcam, double xrel, double yrel);
+extern void camera_move_along_view2(camera cam, double speed);
+
 #endif

@@ -35,6 +35,8 @@ struct local_camera {
 
   /*For fpslike camera*/
   double max_sin_theta;		/* Won't look up or down more than that */
+
+  quaternion orientation;
 };
 
 /**********************************************************************/
@@ -48,6 +50,7 @@ struct local_camera {
 /* Static declarations                                                */
 /**********************************************************************/
 
+static void update_view2(struct local_camera *cam);
 static void update_view(struct local_camera *cam);
 static void update_perspective(struct local_camera *cam);
 
@@ -76,6 +79,8 @@ camera_create(double fov, double zfar, double znear, vector3 *pos, vector3 *look
 
   camera_set_max_theta((camera)cam, DEFMAXSINTHETA);
 
+  quaternion_set(&cam->orientation, 0, 0, 0, 1);
+
   return (camera)cam;
 }
 
@@ -102,7 +107,7 @@ camera_to_opengl(camera cam)
   }
 
   if(lcam->need_update&UPDATE_VIEW) {
-    update_view(lcam);
+    update_view2(lcam);
     glLoadMatrixd((double *)lcam->view_matrix);
     frustum_get_from_opengl(&cam->ftm);
     camera_update_frustum((camera)cam);
@@ -240,6 +245,23 @@ camera_mouse_move(camera gcam, double xrel, double yrel)
 }
 
 void
+camera_mouse_move2(camera gcam, double xrel, double yrel)
+{
+  struct local_camera *lcam = SF_LOCAL_CAMERA(gcam);
+  quaternion q;
+  vector3 tmp;
+
+  quaternion_rotate_vector(&tmp, &lcam->orientation, &XAXIS);
+  quaternion_from_axis_anglev(&q, &tmp, DEG2RAD(-yrel));
+  quaternion_mul(&lcam->orientation, &q, &lcam->orientation);
+
+  quaternion_from_axis_anglev(&q, &YAXIS, DEG2RAD(-xrel));
+  quaternion_mul(&lcam->orientation, &q, &lcam->orientation);
+
+  lcam->need_update |= UPDATE_VIEW;
+}
+
+void
 camera_move_along_view(camera cam, double speed)
 {
   vector3 tmp, view;
@@ -254,7 +276,22 @@ camera_move_along_view(camera cam, double speed)
 }
 
 void
-camera_side_move(camera cam, double speed)
+camera_move_along_view2(camera cam, double speed)
+{
+  vector3 tmp, view;
+
+  struct local_camera *lcam = SF_LOCAL_CAMERA(cam);
+
+  vector3_set(&view, -lcam->view_matrix[0][2], -lcam->view_matrix[1][2], -lcam->view_matrix[2][2]);
+  vector3_scale(&view, &view, speed);
+
+  vector3_add(&cam->pos, &cam->pos, &view);
+
+  SF_LOCAL_CAMERA(cam)->need_update |= UPDATE_VIEW;
+}
+
+void
+camera_side_move2(camera cam, double speed)
 {
   vector3 view, axis;
 
@@ -265,6 +302,19 @@ camera_side_move(camera cam, double speed)
   vector3_scale(&axis, &axis, speed/vector3_norm(&axis)); /* Normalise&move */
   vector3_add(&cam->pos, &cam->pos, &axis);
   vector3_add(&cam->look_at, &cam->look_at, &axis);
+
+  SF_LOCAL_CAMERA(cam)->need_update |= UPDATE_VIEW;
+}
+
+void
+camera_side_move(camera cam, double speed)
+{
+  vector3 right;
+  struct local_camera *lcam = SF_LOCAL_CAMERA(cam);
+
+  vector3_set(&right, speed*lcam->view_matrix[0][0], speed*lcam->view_matrix[1][0], speed*lcam->view_matrix[2][0]);
+
+  vector3_add(&cam->pos, &cam->pos, &right);
 
   SF_LOCAL_CAMERA(cam)->need_update |= UPDATE_VIEW;
 }
@@ -294,7 +344,7 @@ update_view(struct local_camera *cam)
   vector3_cross(&j, &k, &i);
   vector3_normalise(&j, &j);
  
-  cam->view_matrix[0][0] = k.x;	/* Left vector*/
+  cam->view_matrix[0][0] = k.x;	/* Right vector*/
   cam->view_matrix[1][0] = k.y;
   cam->view_matrix[2][0] = k.z;
 
@@ -309,6 +359,20 @@ update_view(struct local_camera *cam)
   cam->view_matrix[3][0] = -vector3_dot(&k, &cam->pos);
   cam->view_matrix[3][1] = -vector3_dot(&j, &cam->pos);;
   cam->view_matrix[3][2] = vector3_dot(&i, &cam->pos);;
+
+  cam->need_update &= ~UPDATE_VIEW;
+}
+
+static void
+update_view2(struct local_camera *cam)
+{
+  quaternion_to_matrix(cam->view_matrix, &cam->orientation);
+
+  cam->view_matrix[3][0] = -(cam->view_matrix[0][0]*cam->pos.x+cam->view_matrix[1][0]*cam->pos.y+cam->view_matrix[2][0]*cam->pos.z);
+  cam->view_matrix[3][1] = -(cam->view_matrix[0][1]*cam->pos.x+cam->view_matrix[1][1]*cam->pos.y+cam->view_matrix[2][1]*cam->pos.z);
+  cam->view_matrix[3][2] = -(cam->view_matrix[0][2]*cam->pos.x+cam->view_matrix[1][2]*cam->pos.y+cam->view_matrix[2][2]*cam->pos.z);
+
+  //matrix4_print(cam->view_matrix);
 
   cam->need_update &= ~UPDATE_VIEW;
 }
