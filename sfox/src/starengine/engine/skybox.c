@@ -13,12 +13,14 @@ enum {FRONT=0, BOTTOM, LEFT, RIGHT, TOP, BACK, LAST};
 /* TODO: Use only one object */
 struct skybox {
   camera cam;
-  object3d obj[6];
+  object3d *obj[6];
   double sx;
 };
 
+static void create_quad(float size);
+
 skybox
-skybox_create(camera cam, char *left, char *right, char *front, char *back, char *top, char *bottom, double sx)
+skybox_create(camera cam, char *left, char *right, char *front, char *back, char *top, char *bottom, float sx)
 {
   matrix4 r, t;
   unsigned int i;
@@ -42,37 +44,55 @@ skybox_create(camera cam, char *left, char *right, char *front, char *back, char
     texture_set_min_filter_mode(tex[i], LINEAR);
     texture_set_mag_filter_mode(tex[i], LINEAR);
     mat[i] = material_create(&tex[i], 1, NULL, 0, 0);
-    sb->obj[i] = create_plan_xy(sx, sx, 1, 1);
-    object3d_set_material(sb->obj[i], mat[i]);
+    sb->obj[i] = object3d_create(matrix4_identity, NULL, mat[i]);
   }
 
-  matrix4_to_translate(t, 0, 0, -sx/2);
-  object3d_set_local_matrix(sb->obj[FRONT], t);
+  object3d_BeginList(sb->obj[FRONT]);
+   glPushMatrix();
+   glTranslatef(0, 0, -sx/2);
+   create_quad(sx);	
+   glPopMatrix();
+  object3d_EndList();
 
-  matrix4_to_translate(t, 0, 0, sx/2);
-  matrix4_to_rot_y(r, 180);
-  matrix4_mul(r, r, t);
-  object3d_set_local_matrix(sb->obj[BACK], r);
+  object3d_BeginList(sb->obj[BACK]);
+   glPushMatrix();
+   glTranslatef(0, 0, sx/2);
+   glRotatef(180, 0, 1, 0);
+   create_quad(sx);	
+   glPopMatrix();
+  object3d_EndList();
 
-  matrix4_to_translate(t, -sx/2, 0, 0);
-  matrix4_to_rot_y(r, 90);
-  matrix4_mul(r, r, t);
-  object3d_set_local_matrix(sb->obj[LEFT], r);
+  object3d_BeginList(sb->obj[LEFT]);
+   glPushMatrix();
+   glTranslatef(-sx/2, 0, 0);
+   glRotatef(90, 0, 1, 0);
+   create_quad(sx);	
+   glPopMatrix();
+  object3d_EndList();
 
-  matrix4_to_translate(t, sx/2, 0, 0);
-  matrix4_to_rot_y(r, -90);
-  matrix4_mul(r, r, t);
-  object3d_set_local_matrix(sb->obj[RIGHT], r);
+  object3d_BeginList(sb->obj[RIGHT]);
+   glPushMatrix();
+   glTranslatef(sx/2, 0, 0);
+   glRotatef(-90, 0, 1, 0);
+   create_quad(sx);
+   glPopMatrix();
+  object3d_EndList();
 
-  matrix4_to_translate(t, 0, sx/2, 0);
-  matrix4_to_rot_x(r, 90);
-  matrix4_mul(r, r, t);
-  object3d_set_local_matrix(sb->obj[TOP], r);
+  object3d_BeginList(sb->obj[TOP]);
+   glPushMatrix();
+   glTranslatef(0, sx/2, 0);
+   glRotatef(90, 1, 0, 0);
+   create_quad(sx);
+   glPopMatrix();
+  object3d_EndList();
 
-  matrix4_to_translate(t, 0, -sx/2, 0);
-  matrix4_to_rot_x(r, -90);
-  matrix4_mul(r, r, t);
-  object3d_set_local_matrix(sb->obj[BOTTOM], r);
+  object3d_BeginList(sb->obj[BOTTOM]);
+   glPushMatrix();
+   glTranslatef(0, -sx/2, 0);
+   glRotatef(-90, 1, 0, 0);
+   create_quad(sx);
+   glPopMatrix();
+  object3d_EndList();
 
   return sb;
 }
@@ -96,4 +116,19 @@ skybox_to_opengl(skybox sb)
   object3d_to_opengl(sb->obj[BOTTOM]);
 
   glEnable(GL_DEPTH_TEST);
+}
+
+static void
+create_quad(float size)
+{
+  object3d_Begin(GL_QUADS);
+   object3d_TexCoord2f(0, 0);
+   object3d_Vertex3f(-size/2, size/2, 0);
+   object3d_TexCoord2f(0, 1);
+   object3d_Vertex3f(-size/2, -size/2, 0);
+   object3d_TexCoord2f(1, 1);
+   object3d_Vertex3f(size/2, -size/2, 0);
+   object3d_TexCoord2f(1, 0);
+   object3d_Vertex3f(size/2, size/2, 0);
+  object3d_End();
 }
