@@ -172,7 +172,7 @@ void init()
   heightfield hf;
   heightfieldinfo hfi;
   skybox sb;
-  object3d plan = create_plan_xy(100, 100, 256, 256);
+  object3d plan = create_plan_xy(100, 100, 1, 1);
   material mat = material_create(NULL, 0, &color_red, 0, 0);
   matrix4 tmp;
   vector3 cam_pos = {0,50,0};
@@ -203,10 +203,10 @@ void init()
   scn = scene_create();
   scene_set_camera(scn, camfps);
   scene_set_display(scn, screen);
-  //scene_add_object(scn, sb, (void *)skybox_to_opengl, NULL);
-  //  scene_add_object(scn, hf, (void *)heightfield_to_opengl, NULL);
+  scene_add_object(scn, sb, (void *)skybox_to_opengl, NULL);
+  scene_add_object(scn, hf, (void *)heightfield_to_opengl, NULL);
   scene_add_object(scn, plan, (void *)object3d_to_opengl, NULL);
-  //scene_add_object2d(scn, hfi, (void *)heightfieldinfo_to_opengl, NULL);
+  scene_add_object2d(scn, hfi, (void *)heightfieldinfo_to_opengl, NULL);
 
   fontgl_init();
   font = fontgl_create("data/vera.ttf", 800, 600, 16);
