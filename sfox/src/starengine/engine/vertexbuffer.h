@@ -3,12 +3,13 @@
 
 #include "vertex.h"
 
-typedef enum {TRIANGLES_INDEXED = 0, TRIANGLES_STRIP} vertexbuffer_type;
+typedef enum {VB_SYSTEM=0, VB_STATIC_DRAW, VB_DYNAMIC_DRAW} vertexbuffer_type;
+typedef enum {TRIANGLES_INDEXED = 0, TRIANGLES_STRIP} vertices_type;
 
 typedef struct vertexbuffer *vertexbuffer;
 
 
-extern vertexbuffer vertexbuffer_create(vertexbuffer_type type, int num_vertices, int num_indices);
+extern vertexbuffer vertexbuffer_create(vertexbuffer_type vbtype, vertices_type vtype, int num_vertices, int num_indices);
 extern void vertexbuffer_destroy(vertexbuffer vb);
 
 /* 1 unlock by lock*/
