@@ -45,6 +45,10 @@ struct heightfield {
   unsigned int patch_sizex;
 };
 
+typedef struct s_patch {
+  vector3 pos;
+  object3d *obj[4];
+} s_patch;
 
 /**********************************************************************/
 /* Static function definition                                         */
@@ -59,6 +63,7 @@ static void quadtree_set_material(quadtree_node node, void *mat);
 static void quadtree_set_material(quadtree_node node, void* mat);
 static void quadtree_render(quadtree_node node, heightfield hf);
 
+static unsigned int calc_lod(heightfield hf, vector3 *patch_pos);
 
 /**********************************************************************/
 /* And now for something completely different                         */
@@ -115,7 +120,9 @@ quadtree_render(quadtree_node node, heightfield hf)
 {
   if(node->childs[0] == NULL || node->childs[1] == NULL ||
      node->childs[2] == NULL || node->childs[3] == NULL) {
-    object3d_to_opengl((object3d *)node->data);
+    s_patch *patch = (s_patch *)node->data;
+    int i = calc_lod(hf, &patch->pos);
+    object3d_to_opengl(patch->obj[i]);
     return;
   }
 
@@ -127,6 +134,19 @@ quadtree_render(quadtree_node node, heightfield hf)
      quadtree_render(node->childs[2], hf);
   if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[3]->box))
      quadtree_render(node->childs[3], hf);
+}
+
+static unsigned int
+calc_lod(heightfield hf, vector3 *patch_pos)
+{
+  int i;
+  float d = plane_dist_to_point(&hf->cam->ftm.near, patch_pos);
+  i = (int)((d/1000)*4);
+  if(i>3)
+    i = 3;
+  else if(i<0)
+    i=0;
+  return i;
 }
 
 /************************************************************************/
@@ -215,7 +235,8 @@ create_zvalues(heightfield hf, char *filename)
 static object3d *
 create_mesh_patch_stripped_lod_list(heightfield hf, float x, float y, int px, int py, int lod)
 {
-  object3d *obj = object3d_create(matrix4_identity, NULL, NULL);
+  vertexbuffer vb = vertexbuffer_create(VB_LIST, 0, 0, 0);
+  object3d *obj = object3d_create(matrix4_identity, vb, NULL);
   unsigned int w, h, step;
 
   w = hf->w;
@@ -239,31 +260,31 @@ create_mesh_patch_stripped_lod_list(heightfield hf, float x, float y, int px, in
 
     y = -hf->sizey/2+py*stepy/step;
 
-    object3d_BeginList(obj);
-    object3d_Begin(GL_TRIANGLE_STRIP);
+    vertexbuffer_lock(vb);
+    vertexbuffer_Begin(vb, GL_TRIANGLE_STRIP);
     for(j = 0; j < hf->patch_sizex-1; j+=step) {
       for(i = 0, u = startu, x = startx; i < hf->patch_sizex; i+=step, ofs+=step) {
-	object3d_MultiTexCoord2f(0, u, v);
-	object3d_MultiTexCoord2f(1, u, v);
-	object3d_Vertex3f(x, z[ofs], y);
-	object3d_MultiTexCoord2f(0, u, v-stepv);
-	object3d_MultiTexCoord2f(1, u, v-stepv);
-	object3d_Vertex3f(x, z[ofs+next_line], y+stepy);
+	vertexbuffer_MultiTexCoord2f(vb, 0, u, v);
+	vertexbuffer_MultiTexCoord2f(vb, 1, u, v);
+	vertexbuffer_Vertex3f(vb, x, z[ofs], y);
+	vertexbuffer_MultiTexCoord2f(vb, 0, u, v-stepv);
+	vertexbuffer_MultiTexCoord2f(vb, 1, u, v-stepv);
+	vertexbuffer_Vertex3f(vb, x, z[ofs+next_line], y+stepy);
 	x += stepx;
 	u += stepu;
       }
-      object3d_MultiTexCoord2f(0, u-stepu, v);
-      object3d_MultiTexCoord2f(1, u-stepu, v);
-      object3d_Vertex3f(x-stepx, z[next_line+(ofs-step)], y+stepy);
-      object3d_MultiTexCoord2f(0, px*stepu, v-stepv);
-      object3d_MultiTexCoord2f(1, px*stepu, v-stepv);
-      object3d_Vertex3f(startx, z[ofs-i+next_line], y+stepy);
+      vertexbuffer_MultiTexCoord2f(vb, 0, u-stepu, v);
+      vertexbuffer_MultiTexCoord2f(vb, 1, u-stepu, v);
+      vertexbuffer_Vertex3f(vb, x-stepx, z[next_line+(ofs-step)], y+stepy);
+      vertexbuffer_MultiTexCoord2f(vb, 0, px*stepu, v-stepv);
+      vertexbuffer_MultiTexCoord2f(vb, 1, px*stepu, v-stepv);
+      vertexbuffer_Vertex3f(vb, startx, z[ofs-i+next_line], y+stepy);
       ofs += next_line-hf->patch_sizex-(step-1);
       v -= stepv;
       y += stepy;
     }
-    object3d_End();
-    object3d_EndList();
+    vertexbuffer_End(vb);
+    vertexbuffer_unlock(vb);
   }
 
   return obj;
@@ -276,6 +297,7 @@ create_mesh_patch_stripped_lod_list(heightfield hf, float x, float y, int px, in
 static object3d *
 create_mesh_patch_stripped_lod2(heightfield hf, float x, float y, int lod)
 {
+  /*Wrong if 1024x1024*/
   int num_patch_x = (hf->w - 1)/(hf->patch_sizex - 1);
   int num_patch_y = (hf->h - 1)/(hf->patch_sizex - 1);
   int cellx = (int)((x+hf->sizex/2)*num_patch_x/hf->sizex);
@@ -289,11 +311,23 @@ create_mesh_patch_stripped_lod2(heightfield hf, float x, float y, int lod)
 static void
 quadtree_fill(quadtree_node node, void  *hf)
 {
-  node->data = create_mesh_patch_stripped_lod2((heightfield)hf, node->box.corners[0].x, node->box.corners[0].y, 0);
+  unsigned int i;
+  s_patch *patch = malloc(sizeof(struct s_patch));
+  for(i = 0; i < 4; i++)
+    patch->obj[i] = create_mesh_patch_stripped_lod2((heightfield)hf, node->box.corners[0].x, node->box.corners[0].y, 0); /*No lod for now*/
+  node->data = patch;
+  patch->pos.x= node->box.corners[0].x;
+  patch->pos.y = 0;
+  patch->pos.z = node->box.corners[0].y;
 }
 
 static void
 quadtree_set_material(quadtree_node node, void *mat)
 {
-  object3d_set_material((object3d *)node->data, (material)mat);
+/*   object3d_set_material((object3d *)node->data, (material)mat); */
+  s_patch *patch = (s_patch *)node->data;
+  object3d_set_material(patch->obj[0], (material)mat);
+  object3d_set_material(patch->obj[1], (material)mat);
+  object3d_set_material(patch->obj[2], (material)mat);
+  object3d_set_material(patch->obj[3], (material)mat);
 }

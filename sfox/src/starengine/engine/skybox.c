@@ -17,11 +17,12 @@ struct skybox {
   float sx;
 };
 
-static void create_quad(float size);
+static void create_quad(vertexbuffer vb, float size);
 
 skybox
 skybox_create(camera cam, char *left, char *right, char *front, char *back, char *top, char *bottom, float sx)
 {
+  vertexbuffer vb;
   unsigned int i;
   material mat[6];
   texture tex[6];
@@ -43,55 +44,62 @@ skybox_create(camera cam, char *left, char *right, char *front, char *back, char
     texture_set_min_filter_mode(tex[i], LINEAR);
     texture_set_mag_filter_mode(tex[i], LINEAR);
     mat[i] = material_create(&tex[i], 1, NULL, 0, 0);
-    sb->obj[i] = object3d_create(matrix4_identity, NULL, mat[i]);
+    vb = vertexbuffer_create(VB_LIST, 0, 0, 0);
+    sb->obj[i] = object3d_create(matrix4_identity, vb, mat[i]);
   }
 
-  object3d_BeginList(sb->obj[FRONT]);
+  vb = sb->obj[FRONT]->vb;
+  vertexbuffer_lock(vb);
    glPushMatrix();
    glTranslatef(0, 0, -sx/2);
-   create_quad(sx);	
+   create_quad(vb, sx);	
    glPopMatrix();
-  object3d_EndList();
+  vertexbuffer_unlock(vb);
 
-  object3d_BeginList(sb->obj[BACK]);
+  vb = sb->obj[BACK]->vb;
+  vertexbuffer_lock(vb);
    glPushMatrix();
    glTranslatef(0, 0, sx/2);
    glRotatef(180, 0, 1, 0);
-   create_quad(sx);	
+   create_quad(vb, sx);
    glPopMatrix();
-  object3d_EndList();
+  vertexbuffer_unlock(vb);
 
-  object3d_BeginList(sb->obj[LEFT]);
+  vb = sb->obj[LEFT]->vb;
+  vertexbuffer_lock(vb);
    glPushMatrix();
    glTranslatef(-sx/2, 0, 0);
    glRotatef(90, 0, 1, 0);
-   create_quad(sx);	
+   create_quad(vb, sx);
    glPopMatrix();
-  object3d_EndList();
+  vertexbuffer_unlock(vb);
 
-  object3d_BeginList(sb->obj[RIGHT]);
-   glPushMatrix();
+  vb = sb->obj[RIGHT]->vb;
+  vertexbuffer_lock(vb);
+  glPushMatrix();
    glTranslatef(sx/2, 0, 0);
    glRotatef(-90, 0, 1, 0);
-   create_quad(sx);
+   create_quad(vb, sx);
    glPopMatrix();
-  object3d_EndList();
+  vertexbuffer_unlock(vb);
 
-  object3d_BeginList(sb->obj[TOP]);
+  vb = sb->obj[TOP]->vb;
+  vertexbuffer_lock(vb);
    glPushMatrix();
    glTranslatef(0, sx/2, 0);
    glRotatef(90, 1, 0, 0);
-   create_quad(sx);
+   create_quad(vb, sx);
    glPopMatrix();
-  object3d_EndList();
+  vertexbuffer_unlock(vb);
 
-  object3d_BeginList(sb->obj[BOTTOM]);
+  vb = sb->obj[BOTTOM]->vb;
+  vertexbuffer_lock(vb);
    glPushMatrix();
    glTranslatef(0, -sx/2, 0);
    glRotatef(-90, 1, 0, 0);
-   create_quad(sx);
+   create_quad(vb, sx);
    glPopMatrix();
-  object3d_EndList();
+  vertexbuffer_unlock(vb);
 
   return sb;
 }
@@ -118,16 +126,16 @@ skybox_to_opengl(skybox sb)
 }
 
 static void
-create_quad(float size)
+create_quad(vertexbuffer vb, float size)
 {
-  object3d_Begin(GL_QUADS);
-   object3d_TexCoord2f(0, 0);
-   object3d_Vertex3f(-size/2, size/2, 0);
-   object3d_TexCoord2f(0, 1);
-   object3d_Vertex3f(-size/2, -size/2, 0);
-   object3d_TexCoord2f(1, 1);
-   object3d_Vertex3f(size/2, -size/2, 0);
-   object3d_TexCoord2f(1, 0);
-   object3d_Vertex3f(size/2, size/2, 0);
-  object3d_End();
+  vertexbuffer_Begin(vb, GL_QUADS);
+   vertexbuffer_TexCoord2f(vb, 0, 0);
+   vertexbuffer_Vertex3f(vb, -size/2, size/2, 0);
+   vertexbuffer_TexCoord2f(vb, 0, 1);
+   vertexbuffer_Vertex3f(vb, -size/2, -size/2, 0);
+   vertexbuffer_TexCoord2f(vb, 1, 1);
+   vertexbuffer_Vertex3f(vb, size/2, -size/2, 0);
+   vertexbuffer_TexCoord2f(vb, 1, 0);
+   vertexbuffer_Vertex3f(vb, size/2, size/2, 0);
+  vertexbuffer_End(vb);
 }
