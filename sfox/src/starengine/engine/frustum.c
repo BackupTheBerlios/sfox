@@ -66,9 +66,9 @@ frustum_get_from_opengl(frustum *ftm)
   plane_normalize(&ftm->left);
   plane_normalize(&ftm->right);
 
-  //  fprintf(stderr, "OPENGL:\n");
-  //frustum_print(ftm);
-  //fprintf(stderr, "\n");
+/*   fprintf(stderr, "OPENGL:\n"); */
+/*   frustum_print(ftm); */
+/*   fprintf(stderr, "\n"); */
 }
 
 int
@@ -141,12 +141,12 @@ frustum_print(frustum *ftm)
 /***********************************************************************/
 
 void
-frustum_to_frustum2d(frustum2d *ftm2d, frustum *ftm)
+frustum_to_frustum2d_xz(frustum2d *ftm2d, frustum *ftm)
 {
-  line2d_set(&ftm2d->left, ftm->left.normal.x, ftm->left.normal.y, ftm->left.d);
-  line2d_set(&ftm2d->right, ftm->right.normal.x, ftm->right.normal.y, ftm->right.d);
-  line2d_set(&ftm2d->front, ftm->far.normal.x, ftm->far.normal.y, ftm->far.d);
-  line2d_set(&ftm2d->back, ftm->near.normal.x, ftm->near.normal.y, ftm->near.d);
+  line2d_set(&ftm2d->left, ftm->left.normal.x, ftm->left.normal.z, ftm->left.d);
+  line2d_set(&ftm2d->right, ftm->right.normal.x, ftm->right.normal.z, ftm->right.d);
+  line2d_set(&ftm2d->front, ftm->far.normal.x, ftm->far.normal.z, ftm->far.d);
+  line2d_set(&ftm2d->back, ftm->near.normal.x, ftm->near.normal.z, ftm->near.d);
 }
 
 int
