@@ -103,9 +103,9 @@ void
 do_move()
 {
   if(keyboard_is_down(SDLK_UP))
-    camera_move_along_view(camfps, camvel*speed_factor);
+    camera_move_along_view2(camfps, camvel*speed_factor);
   else if(keyboard_is_down(SDLK_DOWN))
-    camera_move_along_view(camfps, -camvel*speed_factor);
+    camera_move_along_view2(camfps, -camvel*speed_factor);
   if(keyboard_is_down(SDLK_LEFT))
     camera_side_move(camfps, -camvel*speed_factor);
   else if(keyboard_is_down(SDLK_RIGHT))
@@ -157,10 +157,17 @@ handle_keydown(unsigned int key, unsigned int modstat)
 void
 handle_mouse(SDL_MouseMotionEvent *motion)
 {
+  static double rx = 0;
+  static double ry = 0;
+
   if(motion->x == CENTERX && motion->y == CENTERY) 
     return;  
 
-  camera_mouse_move(camfps, (double)motion->xrel/400.0, (double)motion->yrel/400.0);
+  //camera_mouse_move(camfps, (double)motion->xrel/400.0, (double)motion->yrel/400.0);
+  rx = (double)motion->xrel/10.0;
+  ry = (double)motion->yrel/10.0;
+
+  camera_mouse_move2(camfps, rx, ry);
 }
 
 /*****************************************************************************/
