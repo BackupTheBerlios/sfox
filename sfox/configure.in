@@ -31,7 +31,10 @@ dnl Check for SDL_image
 AC_CHECK_LIB(SDL_image, IMG_Load,SDL_LIBS="$SDL_LIBS -lSDL_image", [AC_MSG_ERROR(*** SDL_image not found)])
 
 dnl Check for libpng
-AC_CHECK_LIB(png, png_init_io,, [AC_MSG_ERROR(*** libpng not found)])
+AC_CHECK_LIB(m, pow)
+AC_CHECK_LIB(z, gzopen)
+AC_CHECK_LIB(bz2, BZ2_bzCompressInit)
+AC_CHECK_LIB(png, png_init_io,, [AC_MSG_ERROR(*** libpng not found)], [-lz -lbz2])
 
 dnl Figure out which math and gl library to use
 case "$target" in
