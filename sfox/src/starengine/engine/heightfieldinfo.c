@@ -62,7 +62,7 @@ heightfieldinfo_to_opengl(heightfieldinfo hfi)
   object2d_to_opengl(SF_OBJECT2D(hfi));
 
   /*Now 0,0 is the center of the minimap*/
-  glLoadMatrixd((double *)*object2d_get_world_matrix(SF_OBJECT2D(hfi)));
+  glLoadMatrixd((double *)SF_OBJECT2D(hfi)->world);
   glScalef(SF_OBJECT2D(hfi)->width, SF_OBJECT2D(hfi)->height, 1);
   glTranslatef(0.5, 0.5, 0);
 
