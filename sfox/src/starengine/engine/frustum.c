@@ -30,8 +30,8 @@ frustum_get_from_opengl(frustum *ftm)
 {
   matrix4 proj, model, clip;
 
-  glGetDoublev(GL_PROJECTION_MATRIX, (double *)proj);
-  glGetDoublev(GL_MODELVIEW_MATRIX, (double *)model);
+  glGetFloatv(GL_PROJECTION_MATRIX, (float *)proj);
+  glGetFloatv(GL_MODELVIEW_MATRIX, (float *)model);
 
   matrix4_mul(clip, model, proj);
 

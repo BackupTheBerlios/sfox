@@ -7,7 +7,7 @@
 #include "quaternion.h"
 
 void
-quaternion_set(quaternion *q, double x, double y, double z, double w)
+quaternion_set(quaternion *q, float x, float y, float z, float w)
 {
   q->x = x;
   q->y = y;
@@ -34,10 +34,10 @@ quaternion_copy(quaternion *dest, const quaternion *src)
 }
 
 void
-quaternion_from_axis_angle(quaternion *q, double ax, double ay, double az, double theta)
+quaternion_from_axis_angle(quaternion *q, float ax, float ay, float az, float theta)
 {
   if(NOTZERO(ax)||NOTZERO(ay)||NOTZERO(az)) {
-    double c, s;
+    float c, s;
 
     theta /= 2.0;
     s = sin(theta);
@@ -54,13 +54,13 @@ quaternion_from_axis_angle(quaternion *q, double ax, double ay, double az, doubl
 }
 
 void
-quaternion_from_axis_anglev(quaternion *q, vector3 *axis, double theta)
+quaternion_from_axis_anglev(quaternion *q, vector3 *axis, float theta)
 {
   quaternion_from_axis_angle(q, axis->x, axis->y, axis->z, theta);
 }
 
 void
-quaternion_from_euler(quaternion *q, double rotx, double roty, double rotz)
+quaternion_from_euler(quaternion *q, float rotx, float roty, float rotz)
 {
   quaternion q1, q2, q3;
 
@@ -72,20 +72,20 @@ quaternion_from_euler(quaternion *q, double rotx, double roty, double rotz)
   quaternion_mul(q, q, &q3);
 }
 
-double
+float
 quaternion_norm(const quaternion *q)
 {
   return sqrt(q->w*q->w+q->x*q->x+q->y*q->y+q->z*q->z);
 }
 
-double
+float
 quaternion_norm2(const quaternion *q)
 {
   return q->w*q->w+q->x*q->x+q->y*q->y+q->z*q->z;
 }
 
 void
-quaternion_div(quaternion *dest, const quaternion *q, double k)
+quaternion_div(quaternion *dest, const quaternion *q, float k)
 {
   assert(NOTZERO(k));
   dest->x = q->x / k;
@@ -120,13 +120,13 @@ quaternion_normalize(quaternion *dest, const quaternion *q)
 void
 quaternion_to_matrix(matrix4 m, const quaternion *q)
 {
-  double x=q->x;
-  double y=q->y;
-  double z=q->z;
-  double w=q->w;
-  double x2=x*x;
-  double y2=y*y;
-  double z2=z*z;
+  float x=q->x;
+  float y=q->y;
+  float z=q->z;
+  float w=q->w;
+  float x2=x*x;
+  float y2=y*y;
+  float z2=z*z;
   
   m[0][0] = 1 - 2*y2 - 2*z2;
   m[0][1] = 2*x*y - 2*w*z;
@@ -142,9 +142,9 @@ quaternion_to_matrix(matrix4 m, const quaternion *q)
 }
 
 void
-quaternion_to_axis_angle(quaternion *q, double *ax, double *ay, double *az, double *theta)
+quaternion_to_axis_angle(quaternion *q, float *ax, float *ay, float *az, float *theta)
 {
-  double scale = sqrt(q->x*q->x+q->y*q->y+q->z*q->z);
+  float scale = sqrt(q->x*q->x+q->y*q->y+q->z*q->z);
   if(NOTZERO(scale)) {
     *theta = 2*acos(q->w);
     *ax = q->x/scale;
@@ -182,19 +182,3 @@ quaternion_rotate_vector(vector3 *dest, const quaternion *q, const vector3 *v)
   dest->y = tmp.y;
   dest->z = tmp.z;
 }
-
-/* void */
-/* quaternion_to_matrix(matrix4 dest, quaternion *q) */
-/* { */
-/*   dest[0][0] = q->w*q->w+q->x*q->x-q->y*q->y-q->z*q->z; */
-/*   dest[0][1] = 2*q->x*q->y - 2*q->w*q->z; */
-/*   dest[0][2] = 2*q->x*q->z + 2*q->w*q->y; */
-
-/*   dest[1][0] = 2*q->x*q->y + 2*q->w*q->z; */
-/*   dest[1][1] = q->w*q->w-q->x2+q->y*q->y-q->z*q->z; */
-/*   dest[1][2] = 2*q->yq->z - 2*q->wq->x; */
-
-/*   dest[2][0] = 2*q->xq->z - 2*q->wq->y; */
-/*   dest[2][1] = 2*q->yq->z + 2*q->wq->x; */
-/*   dest[2][2] = q->w*q->w-q->x2-q->y*q->y+q->z*q->z; */
-/* } */

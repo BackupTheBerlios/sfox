@@ -11,7 +11,7 @@ matrix4 matrix4_identity = MATRIX4_IDENTITY;
 matrix4 matrix4_zero = MATRIX4_ZERO;
 
 void
-matrix4_to_scale(matrix4 dst, double sx, double sy, double sz)
+matrix4_to_scale(matrix4 dst, float sx, float sy, float sz)
 {
   dst[0][0] = sx;
   dst[1][1] = sy;
@@ -25,10 +25,10 @@ matrix4_to_scale(matrix4 dst, double sx, double sy, double sz)
 }
 
 void
-matrix4_to_rot_x(matrix4 dst, double a)
+matrix4_to_rot_x(matrix4 dst, float a)
 {
-  double c = cos(DEG2RAD(a));
-  double s = sin(DEG2RAD(a));
+  float c = cos(DEG2RAD(a));
+  float s = sin(DEG2RAD(a));
 
   dst[0][0] = 1;
   dst[0][1] = 0;
@@ -52,10 +52,10 @@ matrix4_to_rot_x(matrix4 dst, double a)
 }
 
 void
-matrix4_to_rot_y(matrix4 dst, double a)
+matrix4_to_rot_y(matrix4 dst, float a)
 {
-  double c = cos(DEG2RAD(a));
-  double s = sin(DEG2RAD(a));
+  float c = cos(DEG2RAD(a));
+  float s = sin(DEG2RAD(a));
 
   dst[0][0] = c;
   dst[0][1] = 0;
@@ -80,10 +80,10 @@ matrix4_to_rot_y(matrix4 dst, double a)
 }
 
 void
-matrix4_to_rot_z(matrix4 dst, double a)
+matrix4_to_rot_z(matrix4 dst, float a)
 {
-  double c = cos(DEG2RAD(a));
-  double s = sin(DEG2RAD(a));
+  float c = cos(DEG2RAD(a));
+  float s = sin(DEG2RAD(a));
 
   dst[0][0] = c;
   dst[0][1] = s;
@@ -108,7 +108,7 @@ matrix4_to_rot_z(matrix4 dst, double a)
 }
 
 void
-matrix4_to_translate(matrix4 dst, double x, double y, double z)
+matrix4_to_translate(matrix4 dst, float x, float y, float z)
 {
   dst[0][0] = 1;
   dst[0][1] = 0;
@@ -148,7 +148,7 @@ matrix4_mul(matrix4 dst, matrix4 a, matrix4 b)
 }
 
 void
-matrix4_mul_scalar(matrix4 m, double k)
+matrix4_mul_scalar(matrix4 m, float k)
 {
   unsigned int i, j;
 
@@ -221,7 +221,7 @@ matrix4_transpose(matrix4 dst, matrix4 src)
 }
 
 /* Some parts come from ogre3d */
-inline static double
+inline static float
 minor4(matrix4 m, unsigned int r0, unsigned int r1, unsigned int r2,
        unsigned int c0, unsigned int c1, unsigned int c2)
 {
@@ -258,7 +258,7 @@ adjoint4(matrix4 dst, matrix4 src)
   matrix4_copy(dst, tmp);
 }
 
-inline double
+inline float
 matrix4_determinant(matrix4 m)
 {
   return m[0][0] * minor4(m, 1, 2, 3, 1, 2, 3) -
@@ -270,7 +270,7 @@ matrix4_determinant(matrix4 m)
 void
 matrix4_to_inverse(matrix4 m)
 {
-  double det = matrix4_determinant(m);
+  float det = matrix4_determinant(m);
   assert(NOTZERO(det)&&"This matrix is not inversible");
 
   adjoint4(m, m);

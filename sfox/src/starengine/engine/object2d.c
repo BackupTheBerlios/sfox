@@ -49,7 +49,7 @@ object2d_to_opengl(object2d *obj)
   assert(obj);
   glPushMatrix();
 
-  glMultMatrixd((double *)obj->world);
+  glMultMatrixf((float *)obj->world);
   if(obj->mat)
     material_to_opengl(obj->mat);
   vertexbuffer_to_opengl(obj->vb);

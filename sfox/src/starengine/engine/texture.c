@@ -123,7 +123,7 @@ texture_to_opengl(texture tex)
   texture_env_to_opengl(tex);
 
   glMatrixMode(GL_TEXTURE);
-  glLoadMatrixd((double *)tex->m);
+  glLoadMatrixf((float *)tex->m);
   glMatrixMode(GL_MODELVIEW);
 }
 

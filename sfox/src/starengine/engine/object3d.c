@@ -63,7 +63,7 @@ object3d_to_opengl(object3d *obj)
   assert(obj);
   glPushMatrix();		/* Should be somewhere else in a loop */
 
-  glMultMatrixd((double *)obj->world);
+  glMultMatrixf((float *)obj->world);
   if(obj->mat)
     material_to_opengl(obj->mat);
   

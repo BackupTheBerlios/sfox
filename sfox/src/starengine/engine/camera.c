@@ -36,7 +36,7 @@ inline static int roll_not_max(camera cam, float roll);
 /**********************************************************************/
 
 camera
-camera_create(double fov, double zfar, double znear, vector3 *pos, vector3 *up, viewport vp)
+camera_create(float fov, float zfar, float znear, vector3 *pos, vector3 *up, viewport vp)
 {
   camera cam = (camera)malloc(sizeof(struct camera));
   assert(vp);
@@ -80,20 +80,20 @@ camera_to_opengl(camera cam)
   if(cam->need_update&UPDATE_PERSPECTIVE) {
     update_perspective(cam);
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixd((double *)cam->projection_matrix);
+    glLoadMatrixf((float *)cam->projection_matrix);
     glMatrixMode(GL_MODELVIEW);
   }
 
   if(cam->need_update&UPDATE_VIEW) {
     update_view(cam);
-    glLoadMatrixd((double *)cam->view_matrix);
+    glLoadMatrixf((float *)cam->view_matrix);
     frustum_get_from_opengl(&cam->ftm);
     camera_update_frustum(cam);
   }
 }
 
 void
-camera_set_pos(camera cam, double x, double y, double z)
+camera_set_pos(camera cam, float x, float y, float z)
 {
   cam->need_update |= UPDATE_VIEW;
   cam->pos.x = x;
@@ -107,13 +107,13 @@ camera_update_frustum(camera cam)
   vector3 L, D, U, tmp1, tmp2;
   vector3 *E = &cam->pos;
 
-  double tan_fov2 = tan(DEG2RAD(cam->fov/2));
-  double t = cam->znear*tan_fov2;
-  double b = -t;
-  double r = t*viewport_ratio(cam->vp);
-  double l = -r;
-  double near = -cam->znear;
-  double far = cam->zfar;
+  float tan_fov2 = tan(DEG2RAD(cam->fov/2));
+  float t = cam->znear*tan_fov2;
+  float b = -t;
+  float r = t*viewport_ratio(cam->vp);
+  float l = -r;
+  float near = -cam->znear;
+  float far = cam->zfar;
 
   /* First we extract L D U vectors from view matrix */
   vector3_set(&D, cam->view_matrix[0][2], cam->view_matrix[1][2], cam->view_matrix[2][2]);
@@ -122,7 +122,7 @@ camera_update_frustum(camera cam)
 
   /*Far and Near planes*/
   {
-    double d_dot_e = vector3_dot(&D, E);
+    float d_dot_e = vector3_dot(&D, E);
     plane_setv(&cam->ftm.far, &D, -(d_dot_e-far) );
     vector3_scale(&tmp1, &D, -1);
     plane_setv(&cam->ftm.near, &tmp1, d_dot_e+near );
@@ -174,7 +174,7 @@ camera_update_frustum(camera cam)
 /*concat it with the current orientation */
 /*Create a rotation around the up vector and concat*/
 void
-camera_mouse_move(camera cam, double xrel, double yrel)
+camera_mouse_move(camera cam, float xrel, float yrel)
 {
   float pitch = cam->pitch+yrel;
   float yaw = cam->yaw+xrel;
@@ -200,7 +200,7 @@ camera_mouse_move(camera cam, double xrel, double yrel)
 }
 
 void
-camera_move_along_view(camera cam, double speed)
+camera_move_along_view(camera cam, float speed)
 {
   vector3 view;
 
@@ -212,7 +212,7 @@ camera_move_along_view(camera cam, double speed)
 }
 
 void
-camera_side_move(camera cam, double speed)
+camera_side_move(camera cam, float speed)
 {
   vector3 right;
 
@@ -243,8 +243,6 @@ update_view(camera cam)
   cam->view_matrix[3][1] = -(cam->view_matrix[0][1]*cam->pos.x+cam->view_matrix[1][1]*cam->pos.y+cam->view_matrix[2][1]*cam->pos.z);
   cam->view_matrix[3][2] = -(cam->view_matrix[0][2]*cam->pos.x+cam->view_matrix[1][2]*cam->pos.y+cam->view_matrix[2][2]*cam->pos.z);
 
-  matrix4_print(cam->view_matrix);
-
   cam->need_update &= ~UPDATE_VIEW;
 }
 
@@ -253,12 +251,12 @@ update_view(camera cam)
 static void
 update_perspective(camera cam)
 {
-  double fov2 = DEG2RAD(cam->fov/2);
-  double x, y, z;
-  double t,b,r,l;
-  double near = cam->znear;
-  double far = cam->zfar;
-  double n2 = 2*near;
+  float fov2 = DEG2RAD(cam->fov/2);
+  float x, y, z;
+  float t,b,r,l;
+  float near = cam->znear;
+  float far = cam->zfar;
+  float n2 = 2*near;
 
   assert(far!=near&&NOTZERO(far)&&NOTZERO(near));
 
