@@ -123,33 +123,63 @@ camera_set_pos(camera cam, double x, double y, double z)
 void
 camera_update_frustum(camera cam)
 {
-  vector3 L, D, F;
   struct local_camera *lcam = SF_LOCAL_CAMERA(cam);
+  vector3 L, D, U, tmp1, tmp2;
+  vector3 *E = &lcam->pos;
 
   double tan_fov2 = tan(DEG2RAD(lcam->fov/2));
-  double t = lcam->znear*tan_fov2; /*right or top?*/
+  double t = lcam->znear*tan_fov2;
   double b = -t;
   double r = t*viewport_ratio(lcam->vp);
   double l = -r;
   double near = lcam->znear;
   double far = lcam->zfar;
 
-  vector3_set(&lcam->ftm.far.normal, lcam->view_matrix[0][2], lcam->view_matrix[1][2],
-	      lcam->view_matrix[2][2]);
-  vector3_set(&D, lcam->view_matrix[0][2], lcam->view_matrix[1][2],
-	      lcam->view_matrix[2][2]);
-  vector3_set(&L, lcam->view_matrix[0][0], lcam->view_matrix[1][0],
-	      lcam->view_matrix[2][0]);
-  vector3_scale(&D, &D, r);
-  vector3_scale(&L, &L, near);
-  vector3_sub(&lcam->ftm.left.normal, &L, &D);
-  //vector3_scale(&lcam->ftm.left.normal, &lcam->ftm.left.normal, sqrt(near*near+r*r));
-  vector3_normalise(&lcam->ftm.left.normal, &lcam->ftm.left.normal);
+  /* First we extract L D U vectors from view matrix */
+  vector3_set(&D, lcam->view_matrix[0][2], lcam->view_matrix[1][2], lcam->view_matrix[2][2]);
+  vector3_set(&U, lcam->view_matrix[0][1], lcam->view_matrix[1][1], lcam->view_matrix[2][1]);
+  vector3_set(&L, lcam->view_matrix[0][0], lcam->view_matrix[1][0], lcam->view_matrix[2][0]);
 
-  printf("LEFT from camera: %f ", t);
+  /*Far and Near planes*/
+  {
+    double d_dot_e = vector3_dot(&D, E);
+    plane_setv(&lcam->ftm.far, &D, d_dot_e+far );
+    plane_setv(&lcam->ftm.near, &D, d_dot_e+near );
+  }
+  
+  /* Left plane's normal = LN = normalise(near*L-right*D) */
+  /* Left plane's distance = LN.E*/
+  vector3_scale(&tmp1, &L, near);
+  vector3_scale(&tmp2, &D, l);
+  vector3_add(&lcam->ftm.left.normal, &tmp1, &tmp2);
+  /*vector3_scale(&lcam->ftm.left.normal, &lcam->ftm.left.normal, sqrt(near*near+r*r));*/
+  vector3_normalise(&lcam->ftm.left.normal, &lcam->ftm.left.normal);
+  lcam->ftm.left.d = vector3_dot(&lcam->ftm.left.normal, E);
+
+  /* Right plane's normal = RN = normalise(right*D-near*R) */
+  /* Right plane's distance = RN.E*/
+  vector3_scale(&tmp1, &D, r);
+  vector3_scale(&tmp2, &L, -near);
+  vector3_add(&lcam->ftm.right.normal, &tmp1, &tmp2);
+  vector3_normalise(&lcam->ftm.right.normal, &lcam->ftm.right.normal);
+  lcam->ftm.right.d = vector3_dot(&lcam->ftm.right.normal, E);
+
+  /* Top plane's normal = RN = normalise(left*D-near*L) */
+  /* Top plane's distance = RN.E*/
+  vector3_scale(&tmp1, &D, b);
+  vector3_scale(&tmp2, &U, near);
+  vector3_sub(&lcam->ftm.top.normal, &tmp1, &tmp2);
+  vector3_normalise(&lcam->ftm.top.normal, &lcam->ftm.top.normal);
+  lcam->ftm.top.d = vector3_dot(&lcam->ftm.top.normal, E);
+
+  printf("LEFT from camera: %f ", lcam->ftm.left.d);
   vector3_print(&lcam->ftm.left.normal);
-  printf("FAR from camera: ");
-  vector3_print(&lcam->ftm.far.normal);
+  printf("RIGHT from camera: %f ", lcam->ftm.right.d);
+  vector3_print(&lcam->ftm.right.normal);
+  printf("TOP from camera: %f ", lcam->ftm.top.d);
+  vector3_print(&lcam->ftm.top.normal);
+/*   printf("FAR from camera: "); */
+/*   vector3_print(&lcam->ftm.far.normal); */
   printf("\n");
 }
 
@@ -239,6 +269,7 @@ camera_set_max_theta(camera cam, double angle)
 /**************************************/
 
 /*view_matrix is supposed to be identity*/
+/*Matrix from GLU*/
 static void
 update_view(struct local_camera *cam)
 {
@@ -253,15 +284,15 @@ update_view(struct local_camera *cam)
   vector3_cross(&j, &k, &i);
   vector3_normalise(&j, &j);
  
-  cam->view_matrix[0][0] = k.x;
+  cam->view_matrix[0][0] = k.x;	/* Right (or left?) vector*/
   cam->view_matrix[1][0] = k.y;
   cam->view_matrix[2][0] = k.z;
 
-  cam->view_matrix[0][1] = j.x;
+  cam->view_matrix[0][1] = j.x;	/* Up vector */
   cam->view_matrix[1][1] = j.y;
   cam->view_matrix[2][1] = j.z;
 
-  cam->view_matrix[0][2] = -i.x;
+  cam->view_matrix[0][2] = -i.x; /* Direction vector */
   cam->view_matrix[1][2] = -i.y;
   cam->view_matrix[2][2] = -i.z;
 
@@ -273,6 +304,7 @@ update_view(struct local_camera *cam)
 }
 
 /*projection_matrix is supposed to have been zeroed*/
+/*Matrix from the red book*/
 static void
 update_perspective(struct local_camera *cam)
 {
@@ -283,7 +315,7 @@ update_perspective(struct local_camera *cam)
   double far = cam->zfar;
   double n2 = 2*near;
 
-  assert(far!=near!=0);
+  assert(far!=near&&NOTZERO(far)&&NOTZERO(near));
 
   t = tan(fov2)*near;
   b = -t;

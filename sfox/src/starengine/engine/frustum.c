@@ -48,10 +48,16 @@ frustum_get_from_opengl(frustum *ftm)
   plane_normalize(&ftm->right);
 
   //  fprintf(stderr, "%f\n", ftm->left.d);
-  fprintf(stderr, "LEFT from get_frustum %f ", ftm->left.d);
+  fprintf(stderr, "LEFT from opengl %f ", ftm->left.d);
   vector3_print(&ftm->left.normal);
-  fprintf(stderr, "FAR from get_frustum ");
-  vector3_print(&ftm->far.normal);
+  fprintf(stderr, "RIGHT from opengl %f ", ftm->right.d);
+  vector3_print(&ftm->right.normal);
+  fprintf(stderr, "TOP from opengl %f ", ftm->top.d);
+  vector3_print(&ftm->top.normal);
+  fprintf(stderr, "BOTTOM from opengl %f ", ftm->bottom.d);
+  vector3_print(&ftm->bottom.normal);
+/*   fprintf(stderr, "FAR from opengl "); */
+/*   vector3_print(&ftm->far.normal); */
   fprintf(stderr, "\n");
 }
 
