@@ -1,3 +1,9 @@
+2004-01-05  ben  <le.coyote@tiscali.fr>
+
+	* src/starengine/engine/camera.c (camera_update_frustum): Pratical
+	results and theoricals results are not the same:bad equations for
+	plane's normal.
+
 2004-01-04  ben  <le.coyote@tiscali.fr>
 
 	* src/starengine/engine/camera.c (camera_update_frustum): Left
