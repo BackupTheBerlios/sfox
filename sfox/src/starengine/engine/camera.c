@@ -101,12 +101,12 @@ camera_to_opengl(camera cam)
     glMatrixMode(GL_MODELVIEW);
   }
 
-  //if(lcam->need_update&UPDATE_VIEW) {
+  if(lcam->need_update&UPDATE_VIEW) {
     update_view(lcam);
     glLoadMatrixd((double *)lcam->view_matrix);
     frustum_get_from_opengl(&cam->ftm);
     camera_update_frustum((camera)cam);
-    //}
+  }
 }
 
 void
@@ -188,9 +188,9 @@ camera_update_frustum(camera cam)
   vector3_normalise(&lcam->ftm.bottom.normal, &lcam->ftm.bottom.normal);
   lcam->ftm.bottom.d = -vector3_dot(&lcam->ftm.bottom.normal, E);
 
-  printf("CAMERA:\n");
-  frustum_print(&lcam->ftm);
-  printf("\n");
+  //printf("CAMERA:\n");
+  //frustum_print(&lcam->ftm);
+  //printf("\n");
 }
 
 /***********************************************************************/

@@ -66,9 +66,9 @@ frustum_get_from_opengl(frustum *ftm)
   plane_normalize(&ftm->left);
   plane_normalize(&ftm->right);
 
-  fprintf(stderr, "OPENGL:\n");
-  frustum_print(ftm);
-  fprintf(stderr, "\n");
+  //  fprintf(stderr, "OPENGL:\n");
+  //frustum_print(ftm);
+  //fprintf(stderr, "\n");
 }
 
 int
