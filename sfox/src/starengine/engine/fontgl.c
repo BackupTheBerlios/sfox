@@ -9,6 +9,7 @@
 #include "starglu.h"
 
 #include "fontgl.h"
+#include "utility.h"
 
 #define MAXTEXTURES 1024
 #define MAXTEXTURESIZE 256
@@ -79,6 +80,7 @@ fontgl_init_texturesGL(fontgl font, unsigned int char_size)
     }
 }
 
+/*FIXME: invalid value for the last 2 glyphs*/
 static void
 copyBitmap2Texture( fontgl font, int textureN, FT_Bitmap *bmp,
 		    int width, int height, 
@@ -89,9 +91,11 @@ copyBitmap2Texture( fontgl font, int textureN, FT_Bitmap *bmp,
 		    bmp->width, bmp->rows, 
 		    GL_ALPHA, GL_UNSIGNED_BYTE,
 		    bmp->buffer);
+    PRINTGL_ERROR();
 }
 
 
+/*FIXME: OpenGL invalid value for the last 2 glyphs in Copybitmap2texture*/
 fontgl
 fontgl_create(char *fontname, int resX, int resY,
 	      unsigned int char_size)
@@ -121,12 +125,12 @@ fontgl_create(char *fontname, int resX, int resY,
     CharByTexture = CharByLine*CharByLine;
     CharByTexture = CharByTexture>256?256:CharByTexture;
     font->numTextures = (int)ceil(256.0f/CharByTexture);
-    
+
     fontgl_init_texturesGL(font, char_size);
 
     font->maxY = 0;
     Face = font->Face;
-    for( c = 0; c < 255; c++ ) {
+    for( c = 0; c < 253; c++ ) {
 	unsigned int glyph_index = FT_Get_Char_Index( Face, c);
 	err = FT_Load_Glyph( Face, glyph_index, FT_LOAD_NO_HINTING);
 	assert(!err && "Can't load glyph.");
@@ -183,6 +187,9 @@ static void
 fontgl_begin(fontgl font)
 {
   glPushAttrib(GL_ENABLE_BIT|GL_POLYGON_BIT);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+
     glMatrixMode(GL_TEXTURE);
     glLoadIdentity();
 
