@@ -76,7 +76,7 @@ material_create_single_texture_from_file(char *filename)
 void
 material_to_opengl(material mat)
 {
-  unsigned int i;
+  unsigned int i = 0;		/* Needed init. */
 
   if(mat->active_flag&COLOR) {
     glDisable(GL_TEXTURE_2D);
@@ -84,7 +84,6 @@ material_to_opengl(material mat)
     glColor4d(mat->col.r, mat->col.g, mat->col.b, mat->col.a);
   }
 
-  i = 0;
   if(mat->active_flag&TEXTURE)
     for(i = 0; i < mat->num_textures; i++) {
       glActiveTexture(GL_TEXTURE0+i);
