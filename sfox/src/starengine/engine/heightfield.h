@@ -2,11 +2,13 @@
 #define HEIGHTFIELD_H
 
 #include "object3d.h"
+#include "camera.h"
 
 typedef struct heightfield *heightfield;
 
 /*image size must be (2^n)+1 x (2^m)+1*/
-extern heightfield heightfield_create_from_file(char *heightmap_filename,
+extern heightfield heightfield_create_from_file(camera cam,
+                                                char *heightmap_filename,
                                                 double sizex, double sizey,
                                                 double sizez);
 

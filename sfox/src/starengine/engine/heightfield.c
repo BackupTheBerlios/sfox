@@ -1,5 +1,7 @@
 /*TODO: Add the possiblility to draw objects without setting model matrix*/
 /*automatically, heightfield should be derived from object3d*/
+/*Continue quadtree_render*/
+/*far and near must be calculated correctly in frustum_transform_and_copy*/
 #ifdef _WIN32
 # include <windows.h>
 # include <GL/gl.h>
@@ -22,11 +24,14 @@
 #include "texture.h"
 #include "utility.h"
 #include "quadtree.h"
+#include "camera.h"
 
 /* Texure0 is the detailmap and texture1 is the landmap */
 struct heightfield {
+  camera cam;
   matrix4 local, world;
   quadtree_node quadtree;
+  frustum2d *ftm2d;
 
   material mat;
 
@@ -54,6 +59,7 @@ static void quadtree_to_opengl(quadtree_node node, void *data);
 static void quadtree_set_local_matrix(quadtree_node node, void* local);
 static void quadtree_set_world_matrix(quadtree_node node, void* world);
 static void quadtree_set_material(quadtree_node node, void* mat);
+static void quadtree_render(quadtree_node node, heightfield hf);
 
 
 /**********************************************************************/
@@ -61,8 +67,8 @@ static void quadtree_set_material(quadtree_node node, void* mat);
 /**********************************************************************/
 
 heightfield
-heightfield_create_from_file(char *heightmap_filename, double sizex,
-			     double sizey, double sizez)
+heightfield_create_from_file(camera cam, char *heightmap_filename,
+			     double sizex, double sizey, double sizez)
 {
   heightfield hf;
   assert(heightmap_filename);
@@ -73,6 +79,7 @@ heightfield_create_from_file(char *heightmap_filename, double sizex,
   hf->sizey = sizey;
   hf->sizez = sizez;
   hf->patch_sizex = 17;
+  hf->cam = cam;
 
   matrix4_to_scale(hf->local, sizex, sizey, sizez);
   matrix4_copy(hf->world, matrix4_identity);
@@ -93,7 +100,26 @@ heightfield_create_from_file(char *heightmap_filename, double sizex,
 void
 heightfield_to_opengl(heightfield hf)
 {
-  quadtree_foreach_leaf(hf->quadtree, hf, quadtree_to_opengl);
+  frustum ftm;
+  frustum2d ftm2d;
+  matrix4 inv;
+
+  matrix4_mul(inv, hf->local, hf->world);
+  matrix4_to_inverse(inv);
+  frustum_transform_and_copy(&ftm, &hf->cam->ftm, inv, &hf->cam->pos);
+  ftm.near.d = -0.05;
+  ftm.far.d = 1000;
+
+  frustum_to_frustum2d(&ftm2d, &ftm);
+  hf->ftm2d = &ftm2d;
+
+
+  printf("TRANS:\n");
+  frustum_print(&ftm);
+  printf("\n");
+
+  quadtree_render(hf->quadtree, hf);
+  //  quadtree_foreach_leaf(hf->quadtree, hf, quadtree_to_opengl);
 }
 
 /************************************************************************/
@@ -316,7 +342,7 @@ create_mesh_patch_stripped_lod2(heightfield hf, double px, double py, int lod)
   int cellx = (int)((px+0.5)*256.0f/16);
   int celly = (int)((-py+0.5)*256.0f/16);
 
-    printf("%d %d %f %f\n", cellx, celly, px, py);
+  //    printf("%d %d %f %f\n", cellx, celly, px, py);
   
   return create_mesh_patch_stripped_lod(hf, cellx, celly, lod);
 }
@@ -349,6 +375,25 @@ static void
 quadtree_to_opengl(quadtree_node node, void *data)
 {
   object3d_to_opengl((object3d)node->data);
+}
+
+static void
+quadtree_render(quadtree_node node, heightfield hf)
+{
+  if(node->childs[0] == NULL || node->childs[1] == NULL ||
+     node->childs[2] == NULL || node->childs[3] == NULL) {
+    object3d_to_opengl((object3d)node->data);
+    return;
+  }
+
+  if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[0]->box))
+     quadtree_render(node->childs[0], hf);
+  if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[1]->box)) 
+     quadtree_render(node->childs[1], hf);
+  if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[2]->box))
+     quadtree_render(node->childs[2], hf);
+  if(frustum2d_bbox_is_into(hf->ftm2d, &node->childs[3]->box))
+     quadtree_render(node->childs[3], hf);
 }
 
 /***********************************************************************/
