@@ -4,7 +4,7 @@
 #include "bbox.h"
 
 void
-bbox2d_set(bbox2d *bb, double tlx, double tly, double brx, double bry)
+bbox2d_set(bbox2d *bb, float tlx, float tly, float brx, float bry)
 {
   assert(brx>tlx&&bry<tly);
   
