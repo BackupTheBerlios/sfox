@@ -9,14 +9,20 @@
 #include "starengine.h"
 
 #ifdef _WIN32
+/* Multitexturing */
 PFNGLACTIVETEXTUREARBPROC	glActiveTexture;
 PFNGLCLIENTACTIVETEXTUREARBPROC	glClientActiveTexture;
+PFNGLMULTITEXCOORD2FPROC        glMultiTexCoord2f;
+
+/* VBO */
 PFNGLBINDBUFFERARBPROC          glBindBufferARB;
 PFNGLGENBUFFERSARBPROC          glGenBuffersARB;
 PFNGLDELETEBUFFERSARBPROC       glDeleteBuffersARB;
 PFNGLBUFFERDATAARBPROC          glBufferDataARB;
 PFNGLMAPBUFFERARBPROC           glMapBufferARB;
 PFNGLUNMAPBUFFERARBPROC         glUnmapBufferARB;
+
+/* Compressed texture */
 PFNGLCOMPRESSEDTEXIMAGE2DPROC   glCompressedTexImage2D;
 #endif
 
@@ -33,6 +39,7 @@ starengine_init()
   glMapBufferARB = (PFNGLMAPBUFFERARBPROC) wglGetProcAddress("glMapBufferARB");
   glUnmapBufferARB = (PFNGLUNMAPBUFFERARBPROC) wglGetProcAddress("glUnmapBufferARB");
   glCompressedTexImage2D = (PFNGLCOMPRESSEDTEXIMAGE2DPROC) wglGetProcAddress("glCompressedTexImage2D");
+  glMultiTexCoord2f = (PFNGLMULTITEXCOORD2FPROC) wglGetProcAddress("glMultiTexCoord2f");
 #endif
   return 0;
 }

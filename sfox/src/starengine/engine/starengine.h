@@ -11,6 +11,7 @@
 /*Multitexturing*/
 extern PFNGLACTIVETEXTUREARBPROC	glActiveTexture;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC	glClientActiveTexture;
+extern PFNGLMULTITEXCOORD2FPROC         glMultiTexCoord2f;
 
 /*VBO*/
 extern PFNGLBINDBUFFERARBPROC    glBindBufferARB;
