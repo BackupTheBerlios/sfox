@@ -101,12 +101,12 @@ camera_to_opengl(camera cam)
     glMatrixMode(GL_MODELVIEW);
   }
 
-  if(lcam->need_update&UPDATE_VIEW) {
+  //if(lcam->need_update&UPDATE_VIEW) {
     update_view(lcam);
     glLoadMatrixd((double *)lcam->view_matrix);
     frustum_get_from_opengl(&cam->ftm);
     camera_update_frustum((camera)cam);
-  }
+    //}
 }
 
 void
@@ -294,7 +294,7 @@ update_view(struct local_camera *cam)
   vector3_cross(&j, &k, &i);
   vector3_normalise(&j, &j);
  
-  cam->view_matrix[0][0] = k.x;	/* Right (or left?) vector*/
+  cam->view_matrix[0][0] = k.x;	/* Left vector*/
   cam->view_matrix[1][0] = k.y;
   cam->view_matrix[2][0] = k.z;
 
