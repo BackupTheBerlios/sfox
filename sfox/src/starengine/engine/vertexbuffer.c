@@ -245,9 +245,6 @@ create_vbo(vertexbuffer vb)
 	break;
   }
    
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-  glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-
   return vb;
 }
 
@@ -292,7 +289,4 @@ vbo_to_opengl(vertexbuffer vb)
     glDrawElements(v_type[vb->vtype], vb->num_indices, GL_UNSIGNED_INT, OFFSET(0));
   else
     glDrawArrays(v_type[vb->vtype], 0, vb->num_vertices);
-
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-  glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 }
