@@ -10,6 +10,7 @@
 #include "vertex.h"
 #include "object_factory.h"
 #include "texture.h"
+#include "utility.h"
 
 /* Texure0 is the detailmap and texture1 is the landmap */
 struct heightfield {
@@ -50,7 +51,7 @@ heightfield_create_from_file(char *heightmap_filename, double sizex,
     return NULL;
   }
 
-  hf->obj = create_mesh_stripped_lod(hf, sizex, sizey, sizez, 0);
+  hf->obj = create_mesh_stripped_lod(hf, sizex, sizey, sizez, 1);
   if(!hf->obj) {
     free(hf->zvalues);
     free(hf);
@@ -85,9 +86,9 @@ heightfield_set_textures_from_file(heightfield hf, char *land, char *details)
   texture_add_texture_env(tex[1], GL_RGB_SCALE_ARB, 2);
 
   texture_set_min_filter_mode(tex[0], LINEAR_MIPMAP_LINEAR);
-  texture_set_mag_filter_mode(tex[0], LINEAR_MIPMAP);
+  texture_set_mag_filter_mode(tex[0], LINEAR);
   texture_set_min_filter_mode(tex[1], LINEAR_MIPMAP);
-  texture_set_mag_filter_mode(tex[1], LINEAR_MIPMAP_LINEAR);
+  texture_set_mag_filter_mode(tex[1], LINEAR);
 
   mat = material_create(tex, 2, NULL, 0, 0);
   object3d_set_material(hf->obj, mat);
@@ -185,7 +186,7 @@ create_mesh_stripped_lod(heightfield hf, double sizex, double sizey, double size
   step = (1<<lod);
 
   num_vert = (unsigned int)((2*ceil((double)w/step)+2)*(ceil((double)h/step)-1));
-  vb = vertexbuffer_create(TRIANGLES_STRIP, num_vert, 0);
+  vb = vertexbuffer_create(VB_STATIC_DRAW, TRIANGLES_STRIP, num_vert, 0);
 
   vertexbuffer_lock(vb);
   {
